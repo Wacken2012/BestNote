@@ -42,5 +42,20 @@ BestNote ist ein modulares, mandantenfähiges System zur Verwaltung von Notenarc
 - `.github/copilot-instructions.md` für Copilot-Kontext und Entwicklungsleitplanken
 - `.gitignore` schützt sensible und Build-Dateien
 
+## Status (Oktober 2025)
+- Alle Kernmodule (Backend/Frontend) und Hardware-Integration (Scan/Print) sind implementiert
+- API- und End-to-End-Tests für Health, Scan, Print laufen erfolgreich
+- Mandantenfähigkeit, KI-Features, Offline- und PWA-Workflows produktiv
+- Dokumentation und Copilot-Kontext aktuell
+
+## Roadmap
+1. **API- und Frontend-Tests:** End-to-End-Tests aller Kernfunktionen (Import, Export, Kalender, Dashboard, Auth, Offline)
+2. **PWA-Optimierung:** Service Worker, Caching, Mobile UX, Installierbarkeit
+3. **KI-Features ausbauen:** Klassifikation, Chatbot, OCR-Verbesserung
+4. **Datenpersistenz:** Migration auf produktive DB (PostgreSQL), Backup/Restore-Strategien
+5. **Rechte- und Rollenkonzept:** Feingranulare Rechte, Admin-UI
+6. **Deployment:** Dockerisierung, CI/CD, Cloud-Deployment
+7. **Community & Support:** Doku ausbauen, FAQ, Support-Tools
+
 ## Lizenz
 MIT
