@@ -1,4 +1,4 @@
-# BestNote – Modulübersicht & Vision
+# BestNote – Modulübersicht & Vision (Stand Oktober 2025)
 
 ## Ziel
 Ein mandantenfähiges, KI-gestütztes, mobiloptimiertes Vereins- und Notenmanagementsystem mit PWA, API, Exportcenter, Kalender, Kommunikation und vollständiger Vereinsverwaltung.
@@ -28,14 +28,19 @@ Ein mandantenfähiges, KI-gestütztes, mobiloptimiertes Vereins- und Notenmanage
 
 - `main.py`: FastAPI application entry point
 - `models.py`: Pydantic models for data structures
-- `api/`: API endpoints
-- `services/`: Business logic services
+- `api/`: API endpoints (Mandanten, Benutzer/Rollen/Rechte, Kalender, Import/Export, Hardware, Health, Dashboard, Workflows)
+- `services/`: Business logic services (Import/Export, KI, Backup, Chat, Kalender)
+- `auth.py`: Mandantenfähige Authentifizierung, DEV-Bypass
+- `tests/`: Pytest-Tests für alle Kernmodule, Demo- und Fallbackdaten
 
 ## Frontend
 
 - `App.vue`: Main Vue component
 - `main.js`: Vue application entry point
-- `components/`: Reusable Vue components
+- `components/`: Modulare Vue-Komponenten (Dashboard, Kalender, Import, Export, Login, Onboarding, Mandantenverwaltung, Rechteverwaltung, SettingsView, Scan/OCR, Backup)
+- `router.js`: Navigation zwischen Modulen
+- `public/`: Manifest, Icons, PWA-Assets
+- `tests/`: Playwright/Cypress-Tests für Kern-Workflows
 
 ## Documentation
 
@@ -51,13 +56,13 @@ BestNote ist ein modulares, mandantenfähiges Musik- und Vereinsmanagementsystem
 ## Module
 
 ### Backend
-- **auth**: Mandantenfähige Authentifizierung (JWT), Mandant-Isolation, User-Management
-- **api**: REST-API für Mandanten, Workflows, Import/Export, Dashboard, Kalender, u.a.
+- **auth**: Mandantenfähige Authentifizierung (JWT), Mandant-Isolation, User-Management, DEV-Bypass
+- **api**: REST-API für Mandanten, Benutzer/Rollen/Rechte, Workflows, Import/Export, Dashboard, Kalender, Hardware, Health, API-Log
 - **models**: Datenmodelle für Noten, Stimmen, Mandanten, Nutzer, Events
 - **services**: Geschäftslogik für Import/Export, KI-Klassifikation, Backup, Chat, Kalender
 
 ### Frontend
-- **Vue-Komponenten**: Mandanten-Dashboard, Kalender mit RSVP, Import/Export, Onboarding, Login
+- **Vue-Komponenten**: Mandanten-Dashboard, Kalender mit RSVP, Import/Export, Onboarding, Login, SettingsView, Mandantenverwaltung, Rechteverwaltung, Scan/OCR, Backup
 - **PWA-Features**: Offline-Workflow (IndexedDB), Kamera-Scan mit OCR, Responsive UI
 - **API-Integration**: Authentifizierung, Datenabruf, Fehlerbehandlung, Fallbacks
 
@@ -71,6 +76,13 @@ BestNote ist ein modulares, mandantenfähiges Musik- und Vereinsmanagementsystem
 - Benutzerfreundlichkeit: Moderne, reaktive UI, mobile Nutzung
 - KI-Integration: Automatisierung und intelligente Vorschläge
 - Datensicherheit: Backups, Rechte, Audit-Log
+
+## Test- und Entwicklungsstand (Oktober 2025)
+- Alle Kernmodule (Backend/Frontend) und Hardware-Integration (Scan/Print) sind implementiert
+- API- und End-to-End-Tests für Health, Scan, Print laufen erfolgreich
+- Mandantenfähigkeit, KI-Features, Offline- und PWA-Workflows produktiv
+- Rechteverwaltung (Benutzer/Rollen/Rechte) als API und Frontend-Modul integriert
+- Dokumentation und Copilot-Kontext aktuell
 
 ## Technische Entscheidungen
 - **FastAPI** für schnelles, typisiertes Backend
