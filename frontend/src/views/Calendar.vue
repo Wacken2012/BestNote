@@ -212,15 +212,16 @@ export default {
           }
         })
 
-        if (response.ok) {
-          this.events = await response.json()
+        const contentType = response.headers.get('content-type') || '';
+        if (response.ok && contentType.includes('application/json')) {
+          this.events = await response.json();
         } else {
-          console.error('Fehler beim Laden der Termine')
-          this.loadDemoEvents()
+          console.error('API-Fehler: Kein JSON vom Server, Fallback auf Demo-Events');
+          this.loadDemoEvents();
         }
       } catch (error) {
-        console.error('API-Fehler:', error)
-        this.loadDemoEvents()
+        console.error('API-Fehler:', error);
+        this.loadDemoEvents();
       }
     },
     loadDemoEvents() {

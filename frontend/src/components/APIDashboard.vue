@@ -272,47 +272,30 @@ export default {
       ]
     },
 
-    loadLogs() {
-      // Demo-Logs
-      this.logs = [
-        {
-          id: 1,
-          endpoint: '/api/scores',
-          method: 'GET',
-          status_code: 200,
-          response_time: 145,
-          ip_address: '192.168.1.100',
-          timestamp: new Date(Date.now() - 300000).toISOString()
-        },
-        {
-          id: 2,
-          endpoint: '/api/scores/123',
-          method: 'PUT',
-          status_code: 200,
-          response_time: 234,
-          ip_address: '192.168.1.101',
-          timestamp: new Date(Date.now() - 600000).toISOString()
-        },
-        {
-          id: 3,
-          endpoint: '/api/auth/login',
-          method: 'POST',
-          status_code: 401,
-          response_time: 89,
-          ip_address: '192.168.1.102',
-          error_message: 'Invalid credentials',
-          timestamp: new Date(Date.now() - 900000).toISOString()
-        },
-        {
-          id: 4,
-          endpoint: '/api/dashboard',
-          method: 'GET',
-          status_code: 200,
-          response_time: 312,
-          ip_address: '192.168.1.100',
-          timestamp: new Date(Date.now() - 1200000).toISOString()
+    async loadLogs() {
+      try {
+        const response = await fetch('/dashboard/api-log');
+        if (response.ok) {
+          const data = await response.json();
+          // Backend liefert: mandant, endpoint, status_code, timestamp
+          // Frontend erwartet: id, endpoint, method, status_code, response_time, ip_address, timestamp, error_message
+          // Fülle fehlende Felder mit Platzhaltern
+          this.logs = data.map((entry, idx) => ({
+            id: idx + 1,
+            endpoint: entry.endpoint,
+            method: entry.method || '',
+            status_code: entry.status_code,
+            response_time: entry.response_time || 0,
+            ip_address: entry.ip_address || '',
+            timestamp: entry.timestamp,
+            error_message: entry.error_message || ''
+          }));
+        } else {
+          this.logs = [];
         }
-      ]
+      } catch (e) {
+        this.logs = [];
+      }
     },
 
     loadAnalytics() {

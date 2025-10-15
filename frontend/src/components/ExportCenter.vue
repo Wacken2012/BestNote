@@ -1,6 +1,7 @@
 <template>
   <div class="export-center">
-    <h2>Export-Center</h2>
+    <h2>Export</h2>
+    <h3>Export-Center</h3>
 
     <div class="export-form">
       <div class="form-group">
@@ -32,7 +33,7 @@
     </div>
 
     <!-- Layout-Vorschau -->
-    <div class="layout-preview" v-if="selectedLayout">
+    <div class="layout-preview" v-if="selectedLayout && layouts && layouts[selectedLayout]">
       <h3>Layout-Vorschau: {{ layouts[selectedLayout].name }}</h3>
       <div class="preview-container">
         <div class="preview-mockup" :class="selectedLayout">
@@ -204,15 +205,17 @@ export default {
           }
         })
 
-        if (response.ok) {
-          this.layouts = await response.json()
+        const contentType = response.headers.get('content-type') || '';
+        if (response.ok && contentType.includes('application/json')) {
+          this.layouts = await response.json();
         } else {
           // Fallback auf statische Layouts
-          this.loadDemoLayouts()
+          console.error('Layout-Fehler: Kein JSON vom Server, Fallback auf Demo-Layouts');
+          this.loadDemoLayouts();
         }
       } catch (error) {
-        console.error('Layout-Fehler:', error)
-        this.loadDemoLayouts()
+        console.error('Layout-Fehler:', error);
+        this.loadDemoLayouts();
       }
     },
     loadDemoLayouts() {
@@ -239,15 +242,17 @@ export default {
           }
         })
 
-        if (response.ok) {
-          this.history = await response.json()
+        const contentType = response.headers.get('content-type') || '';
+        if (response.ok && contentType.includes('application/json')) {
+          this.history = await response.json();
         } else {
           // Fallback auf Demo-Daten
-          this.loadDemoHistory()
+          console.error('History-Fehler: Kein JSON vom Server, Fallback auf Demo-History');
+          this.loadDemoHistory();
         }
       } catch (error) {
-        console.error('History-Fehler:', error)
-        this.loadDemoHistory()
+        console.error('History-Fehler:', error);
+        this.loadDemoHistory();
       }
     },
     loadDemoHistory() {
@@ -320,7 +325,6 @@ export default {
     },
     getAuthToken() {
       return localStorage.getItem('auth_token') || ''
-    }
     }
   }
 }

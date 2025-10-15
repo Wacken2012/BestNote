@@ -7,7 +7,7 @@ BestNote ist ein modulares, mandantenfähiges System zur Verwaltung von Notenarc
 - Import (SoftNote), Export (ZIP mit Layout), Backup/Restore
 - Kalender mit Zusagefunktion
 - KI-gestützte Klassifikation und OCR (Scan/Kamera)
-- Hardware-Integration: Scanner & Drucker (Windows & Linux)
+- Hardware-Integration: Scanner & Drucker (Windows, Linux, macOS – macOS ungetestet)
 - API-Logging, Audit-Log, Rechte/Rollen
 - Offline- und Mobile-First (PWA, IndexedDB)
 - REST-API für alle Workflows
@@ -38,6 +38,7 @@ BestNote ist ein modulares, mandantenfähiges System zur Verwaltung von Notenarc
    ```
 
 ## Hinweise
+- **macOS-Unterstützung für Scan/Print ist experimentell und ungetestet.**
 - Siehe `docs/` für Architektur, Module und Roadmap
 - `.github/copilot-instructions.md` für Copilot-Kontext und Entwicklungsleitplanken
 - `.gitignore` schützt sensible und Build-Dateien
