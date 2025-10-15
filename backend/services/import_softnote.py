@@ -1,10 +1,35 @@
+import io
 import csv
 import zipfile
 import os
 from typing import List, Dict, Any, Optional
 from backend.models import Score, Part, PartFile
 
-class SoftNoteImportService:
+
+class ImportFileService:
+    def import_csv(self, csv_content: str, mandant_id: int) -> dict:
+        # Dummy-Implementierung: Zählt Zeilen und gibt sie zurück
+        works = self.parse_csv(csv_content, mandant_id)
+        return {
+            "imported": len(works),
+            "works": works,
+            "warnings": []
+        }
+
+    def import_zip(self, zip_content: bytes, mandant_id: int) -> dict:
+        # Dummy-Implementierung: Listet Dateien im ZIP auf
+        warnings = []
+        try:
+            with zipfile.ZipFile(io.BytesIO(zip_content), 'r') as zip_ref:
+                files = zip_ref.namelist()
+        except Exception as e:
+            warnings.append(f"ZIP-Fehler: {str(e)}")
+            files = []
+        return {
+            "imported": len(files),
+            "files": files,
+            "warnings": warnings
+        }
     def __init__(self):
         self.mapping = {
             'title': 'Titel',
@@ -14,7 +39,6 @@ class SoftNoteImportService:
         }
 
     def validate_csv(self, csv_content: str) -> bool:
-        """Validiert CSV-Format aus SoftNote"""
         try:
             reader = csv.DictReader(csv_content.splitlines())
             required_fields = ['Titel', 'Komponist']
@@ -26,10 +50,8 @@ class SoftNoteImportService:
             return False
 
     def parse_csv(self, csv_content: str, mandant_id: Optional[int] = None) -> List[Dict[str, Any]]:
-        """Parst CSV und mappt zu Score-Objekten mit optionaler Mandant-Verknüpfung"""
         reader = csv.DictReader(csv_content.splitlines())
         scores = []
-
         for row in reader:
             score = Score(
                 title=row.get('Titel', ''),
@@ -38,10 +60,41 @@ class SoftNoteImportService:
                 metadata=row.get('Metadaten', '')
             )
             if mandant_id is not None:
-                score.mandant_id = mandant_id  # Mandant-spezifische Speicherung
+                score.mandant_id = mandant_id
             scores.append(score.dict())
-
         return scores
+
+    def preview_csv(self, csv_content: str) -> dict:
+        valid = self.validate_csv(csv_content)
+        warnings = []
+        works = []
+        parts = []
+        if valid:
+            works = self.parse_csv(csv_content)
+        else:
+            warnings.append("CSV-Format ungültig oder fehlende Felder.")
+        return {
+            "works": works,
+            "parts": parts,
+            "warnings": warnings
+        }
+
+    def preview_zip(self, zip_content: bytes) -> dict:
+        warnings = []
+        works = []
+        parts = []
+        try:
+            with zipfile.ZipFile(io.BytesIO(zip_content), 'r') as zip_ref:
+                files = zip_ref.namelist()
+                # Optional: weitere Logik für ZIP-Inhalt
+        except Exception as e:
+            warnings.append(f"ZIP-Fehler: {str(e)}")
+            files = []
+        return {
+            "works": works,
+            "parts": parts,
+            "warnings": warnings + [f"Dateien im ZIP: {files}"]
+        }
 
     def extract_zip(self, zip_path: str, extract_to: str, mandant_id: int) -> List[str]:
         """Extrahiert ZIP-Datei in mandant-spezifisches Verzeichnis"""

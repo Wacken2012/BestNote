@@ -33,6 +33,11 @@ async def scan_document():
                 result = 0
             except Exception as e:
                 raise Exception(f"Windows-Scan-Fehler: {e}")
+        elif system == "Darwin":
+            # macOS: Nutze 'imagescan' (Epson/Canon) oder 'scanimage' falls verfügbar, dann convert
+            # ACHTUNG: Diese Logik ist ungetestet!
+            scan_cmd = f"scanimage --format=png > {temp_dir}/scan.png && convert {temp_dir}/scan.png {output_path}"
+            result = os.system(scan_cmd)
         else:
             raise Exception(f"Nicht unterstütztes Betriebssystem: {system}")
         if result != 0 or not os.path.exists(output_path):
@@ -63,6 +68,11 @@ async def print_document(file: UploadFile = File(...)):
                 result = 0
             except Exception as e:
                 raise Exception(f"Windows-Druck-Fehler: {e}")
+        elif system == "Darwin":
+            # macOS: Nutze 'lp' Befehl
+            # ACHTUNG: Diese Logik ist ungetestet!
+            print_cmd = f"lp {file_path}"
+            result = os.system(print_cmd)
         else:
             raise Exception(f"Nicht unterstütztes Betriebssystem: {system}")
         if result != 0:

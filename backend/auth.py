@@ -1,6 +1,9 @@
+
+import os
 from fastapi import Request, HTTPException, Depends
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 import jwt
+from jwt import InvalidTokenError
 from typing import Optional
 from pydantic import BaseModel
 
@@ -18,7 +21,11 @@ security = HTTPBearer()
 def verify_token(credentials: HTTPAuthorizationCredentials = Depends(security)) -> TokenData:
     """
     JWT-Token verifizieren und Token-Daten extrahieren
+    DEV-Bypass: Wenn DEV_AUTH_BYPASS=1, immer Demo-Token zurückgeben
     """
+    if os.environ.get("DEV_AUTH_BYPASS", "0") == "1":
+        # Demo-Token für Entwicklung/Test
+        return TokenData(mandant_id=1, user_id=1, username="devuser")
     try:
         payload = jwt.decode(credentials.credentials, JWT_SECRET, algorithms=[JWT_ALGORITHM])
         mandant_id = payload.get("mandant_id")
@@ -31,14 +38,35 @@ def verify_token(credentials: HTTPAuthorizationCredentials = Depends(security)) 
         return TokenData(mandant_id=mandant_id, user_id=user_id, username=username)
     except jwt.ExpiredSignatureError:
         raise HTTPException(status_code=401, detail="Token abgelaufen")
-    except jwt.JWTError:
+    except InvalidTokenError:
         raise HTTPException(status_code=401, detail="Token ungültig")
 
-def get_current_mandant(token_data: TokenData = Depends(verify_token)) -> int:
+from fastapi import Request
+from fastapi import Header
+import os
+from typing import Optional
+
+def get_current_mandant(
+    token_data: Optional[TokenData] = Depends(lambda: None),
+    authorization: Optional[str] = Header(None)
+) -> int:
     """
     Aktuelle Mandant-ID aus Token extrahieren
+    DEV-Bypass: Wenn DEV_AUTH_BYPASS=1, immer Mandant 1 zurückgeben, auch ohne Auth-Header
     """
-    return token_data.mandant_id
+    if os.environ.get("DEV_AUTH_BYPASS", "0") == "1":
+        return 1
+    if token_data:
+        return token_data.mandant_id
+    # Fallback: Token aus Header extrahieren, falls vorhanden
+    if authorization and authorization.startswith("Bearer "):
+        try:
+            import jwt
+            payload = jwt.decode(authorization.split(" ")[1], JWT_SECRET, algorithms=[JWT_ALGORITHM])
+            return payload.get("mandant_id", 1)
+        except Exception:
+            raise HTTPException(status_code=401, detail="Token ungültig")
+    raise HTTPException(status_code=401, detail="Nicht authentifiziert")
 
 def create_access_token(data: dict) -> str:
     """
@@ -67,23 +95,28 @@ async def mandant_isolation_middleware(request: Request, call_next):
         requested_mandant_id = int(query_params["mandant_id"])
 
     # Wenn eine Mandant-ID angefordert wurde, prüfe Authentifizierung
+    import os
     if requested_mandant_id is not None:
-        auth_header = request.headers.get("authorization")
-        if not auth_header or not auth_header.startswith("Bearer "):
-            raise HTTPException(status_code=401, detail="Authentifizierung erforderlich")
+        if os.environ.get("DEV_AUTH_BYPASS", "0") == "1":
+            # DEV-Bypass: Immer erlauben
+            pass
+        else:
+            auth_header = request.headers.get("authorization")
+            if not auth_header or not auth_header.startswith("Bearer "):
+                raise HTTPException(status_code=401, detail="Authentifizierung erforderlich")
 
-        try:
-            token = auth_header.split(" ")[1]
-            payload = jwt.decode(token, JWT_SECRET, algorithms=[JWT_ALGORITHM])
-            user_mandant_id = payload.get("mandant_id")
+            try:
+                token = auth_header.split(" ")[1]
+                payload = jwt.decode(token, JWT_SECRET, algorithms=[JWT_ALGORITHM])
+                user_mandant_id = payload.get("mandant_id")
 
-            if user_mandant_id != requested_mandant_id:
-                raise HTTPException(
-                    status_code=403,
-                    detail="Zugriff auf diesen Mandanten nicht erlaubt"
-                )
-        except jwt.JWTError:
-            raise HTTPException(status_code=401, detail="Ungültiger Token")
+                if user_mandant_id != requested_mandant_id:
+                    raise HTTPException(
+                        status_code=403,
+                        detail="Zugriff auf diesen Mandanten nicht erlaubt"
+                    )
+            except Exception:
+                raise HTTPException(status_code=401, detail="Ungültiger Token")
 
     response = await call_next(request)
     return response

@@ -33,22 +33,6 @@ class ApiLogEntry(BaseModel):
     status_code: int
     timestamp: str
 
-@router.middleware('http')
-async def log_api_access(request: Request, call_next):
-    response = await call_next(request)
-    try:
-        mandant = request.headers.get('X-Mandant') or 'unknown'
-        entry = {
-            'mandant': mandant,
-            'endpoint': request.url.path,
-            'status_code': response.status_code,
-            'timestamp': datetime.utcnow().isoformat()
-        }
-        with log_lock:
-            api_log.append(entry)
-    except Exception:
-        pass
-    return response
 
 @router.get("/{mandant_id}")
 async def get_dashboard_data(mandant_id: int) -> Dict[str, Any]:

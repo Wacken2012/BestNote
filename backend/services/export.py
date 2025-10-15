@@ -25,16 +25,17 @@ class ExportService:
         return self.layouts
 
     def create_export_zip(self, mandant_id: int, layout: str = 'standard', include_pdfs: bool = True, include_metadata: bool = True) -> str:
-        """Erstellt ZIP-Datei für Export"""
+        """Erstellt ZIP-Datei für Export im festen Verzeichnis /tmp/bestnote_exports/"""
         timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
-        zip_filename = f'export_mandant_{mandant_id}_{layout}_{timestamp}.zip'
-
-        # Temporäres Verzeichnis für Export
         export_dir = f'/tmp/bestnote_export_{mandant_id}_{timestamp}'
+        zip_dir = '/tmp/bestnote_exports'
         os.makedirs(export_dir, exist_ok=True)
+        os.makedirs(zip_dir, exist_ok=True)
+        zip_filename = f'export_mandant_{mandant_id}_{layout}_{timestamp}.zip'
+        zip_path = os.path.join(zip_dir, zip_filename)
 
         try:
-            with zipfile.ZipFile(zip_filename, 'w', zipfile.ZIP_DEFLATED) as zipf:
+            with zipfile.ZipFile(zip_path, 'w', zipfile.ZIP_DEFLATED) as zipf:
                 # Metadaten hinzufügen
                 if include_metadata:
                     metadata = self._generate_metadata(mandant_id, layout)
@@ -55,7 +56,7 @@ class ExportService:
                 if include_pdfs:
                     self._add_pdf_files(zipf, mandant_id)
 
-            return zip_filename
+            return zip_path
 
         finally:
             # Aufräumen temporärer Dateien

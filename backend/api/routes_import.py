@@ -2,10 +2,12 @@ from fastapi import APIRouter, Depends, HTTPException, UploadFile, File
 from typing import List, Dict, Optional
 from pydantic import BaseModel
 from backend.auth import get_current_mandant
-from backend.services.import_softnote import SoftNoteImportService
 
 router = APIRouter()
-import_service = SoftNoteImportService()
+
+from backend.services.import_softnote import ImportFileService
+
+import_service = ImportFileService()
 
 # Pydantic-Modelle für API
 class ImportPreviewResponse(BaseModel):
@@ -29,12 +31,12 @@ async def preview_import(
     """Vorschau für Import-Datei generieren"""
     try:
         content = await file.read()
-        filename = file.filename
+        filename = file.filename or ""
 
         if filename.endswith('.csv'):
-            result = import_service.preview_csv_import(content.decode('utf-8'))
+            result = import_service.preview_csv(content.decode('utf-8'))
         elif filename.endswith('.zip'):
-            result = import_service.preview_zip_import(content)
+            result = import_service.preview_zip(content)
         else:
             raise HTTPException(status_code=400, detail="Nicht unterstütztes Dateiformat")
 
@@ -50,7 +52,7 @@ async def execute_import(
     """Import ausführen"""
     try:
         content = await file.read()
-        filename = file.filename
+        filename = file.filename or ""
 
         if filename.endswith('.csv'):
             result = import_service.import_csv(content.decode('utf-8'), current_mandant)
