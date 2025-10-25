@@ -1,9 +1,10 @@
 import { vi } from 'vitest'
-import { setActivePinia, createPinia } from 'pinia'
+import { setActivePinia } from 'pinia'
+import { createTestingPinia } from '@pinia/testing'
 
-// Aktiviere Pinia für alle Tests
-const pinia = createPinia()
+// Aktiviere eine testbare Pinia-Instanz
+const pinia = createTestingPinia()
 setActivePinia(pinia)
 
-// Beispiel: globale Mocks (optional)
+// Optional: globale Mocks
 vi.stubGlobal('console', console)
