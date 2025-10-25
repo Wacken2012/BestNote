@@ -62,4 +62,16 @@ describe('POST /api/members/import', () => {
     const match = files.some(f => /imported_members\.backup\.|db\.backup\.|members_snapshot\.backup\./.test(f))
     expect(match).toBe(true)
   })
+
+  test('backup rotation keeps only last N backups', async () => {
+    // create more backups than MAX_BACKUPS to trigger rotation
+    const MAX = Number(process.env.MAX_BACKUPS || 5)
+    const iterations = MAX + 3
+    for (let i = 0; i < iterations; i++) {
+      const res = await request(app).post('/api/members/import').set('x-user-role', 'admin').send({ members: sample, backup: true })
+      expect(res.status).toBe(200)
+    }
+    const files = fs.existsSync(backupsDir) ? fs.readdirSync(backupsDir) : []
+    expect(files.length).toBeLessThanOrEqual(MAX)
+  })
 })
