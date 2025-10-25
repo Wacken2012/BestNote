@@ -6,7 +6,11 @@
     <ul>
       <li v-for="m in members" :key="m.id">{{ m.name || m.id }} <small>({{ m.id }})</small></li>
     </ul>
-    <button @click="preview" :disabled="members.length===0 || applying">Import übernehmen</button>
+    <label style="display:block; margin:8px 0">
+      <input type="checkbox" v-model="backupBefore" :disabled="applying || committing" /> Backup vor Import erstellen
+    </label>
+  <button @click="preview" :disabled="members.length===0 || applying || committing">Import übernehmen</button>
+  <div v-if="applying || committing" style="margin-top:8px">{{ applying ? 'Vorschau wird geladen…' : 'Import wird angewendet…' }}</div>
 
     <!-- simple modal -->
     <div v-if="showModal" class="modal-backdrop">
@@ -15,7 +19,7 @@
         <p>Neue Mitglieder: <strong>{{ previewResult.created }}</strong></p>
         <p>Aktualisiert: <strong>{{ previewResult.updated }}</strong></p>
         <div class="actions">
-          <button @click="confirmImport" :disabled="committing">Import bestätigen</button>
+          <button @click="confirmImport" :disabled="committing">{{ committing ? 'Import wird angewendet…' : 'Import bestätigen' }}</button>
           <button @click="closeModal" :disabled="committing">Abbrechen</button>
         </div>
       </div>
@@ -36,6 +40,7 @@ const previewResult = ref({ created: 0, updated: 0 })
 const error = ref('')
 const { request } = useApi()
 const { push } = useNotify()
+const backupBefore = ref(false)
 
 async function load() {
   loading.value = true
@@ -65,7 +70,7 @@ async function confirmImport() {
   if (!members.value.length) return push('Keine Mitglieder zum Importieren', 'error')
   committing.value = true
   try {
-    const res = await request('/api/members/import', { method: 'POST', body: JSON.stringify({ members: members.value }) })
+    const res = await request('/api/members/import', { method: 'POST', body: JSON.stringify({ members: members.value, backup: backupBefore.value }) })
     push('Import erfolgreich: ' + (res.created || 0) + ' erstellt, ' + (res.updated || 0) + ' aktualisiert', 'success')
     showModal.value = false
   } catch (e:any) {

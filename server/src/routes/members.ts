@@ -90,8 +90,36 @@ router.post('/import', (req, res) => {
     const dry = String(rawDry) === 'true'
     if (!dry) {
       // write to imported_members.json for safety (don't overwrite main db)
-      const outPath = require('path').join(__dirname, '..', '..', 'data', 'imported_members.json')
+      const path = require('path')
       const fs = require('fs')
+      const dataDir = path.join(__dirname, '..', '..', 'data')
+      const outPath = path.join(dataDir, 'imported_members.json')
+
+      // backup behavior: if requested, create timestamped backup by copying existing files
+      const wantBackup = Boolean((req.body && (req.body as any).backup))
+      if (wantBackup) {
+        try {
+          const backupsDir = path.join(dataDir, 'backups')
+          if (!fs.existsSync(backupsDir)) fs.mkdirSync(backupsDir, { recursive: true })
+          const timestamp = new Date().toISOString().replace(/[:.]/g, '-')
+          const importedPath = outPath
+          const dbPath = path.join(dataDir, 'db.json')
+          if (fs.existsSync(importedPath)) {
+            const dest = path.join(backupsDir, `imported_members.backup.${timestamp}.json`)
+            fs.copyFileSync(importedPath, dest)
+          } else if (fs.existsSync(dbPath)) {
+            const dest = path.join(backupsDir, `db.backup.${timestamp}.json`)
+            fs.copyFileSync(dbPath, dest)
+          } else {
+            // fallback: write snapshot of current members
+            const dest = path.join(backupsDir, `members_snapshot.backup.${timestamp}.json`)
+            fs.writeFileSync(dest, JSON.stringify(existing, null, 2) + '\n', 'utf8')
+          }
+        } catch (err) {
+          console.error('backup failed', err)
+        }
+      }
+
       fs.writeFileSync(outPath, JSON.stringify(existing, null, 2) + '\n', 'utf8')
     }
 

@@ -1,10 +1,10 @@
 {
-  "added": [],
-  "skipped": [
+  "added": [
     {
-      "reason": "duplicate id",
-      "id": "C2"
+      "id": "C2",
+      "name": "Concurrent Two"
     }
   ],
+  "skipped": [],
   "errors": []
 }
