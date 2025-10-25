@@ -7,6 +7,8 @@ import routes from './router'
 import messages from './i18n'
 import vCan from './directives/v-can'
 import vCanUpload from './directives/canUpload'
+import vCanPiece from './directives/canPiece'
+import vCanCalendar from './directives/canCalendar'
 
 const app = createApp(App)
 const pinia = createPinia()
@@ -18,6 +20,8 @@ app.use(router)
 app.use(i18n)
 app.directive('can', vCan)
 app.directive('can-upload', vCanUpload)
+app.directive('can-piece', vCanPiece)
+app.directive('can-calendar', vCanCalendar)
 
 // Service worker registration will be handled by vite-plugin-pwa automatically
 
