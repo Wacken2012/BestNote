@@ -1,0 +1,12 @@
+{
+  "app": {
+    "title": "OpenMusikVerein",
+    "library": "Notenarchiv",
+    "members": "Mitglieder",
+    "events": "Termine",
+    "finances": "Finanzen",
+    "settings": "Einstellungen",
+    "addPiece": "+ Stück hinzufügen",
+    "createSetlist": "Setliste erstellen"
+  }
+}

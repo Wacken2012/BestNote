@@ -1,0 +1,12 @@
+{
+  "app": {
+    "title": "OpenMusicClub",
+    "library": "Library",
+    "members": "Members",
+    "events": "Events",
+    "finances": "Finances",
+    "settings": "Settings",
+    "addPiece": "+ Add piece",
+    "createSetlist": "Create setlist"
+  }
+}

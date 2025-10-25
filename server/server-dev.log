@@ -1,0 +1,33 @@
+nohup: Eingabe wird ignoriert
+
+> openmusikverein-server@0.1.0 dev
+> ts-node-dev --respawn --transpile-only src/index.ts
+
+[INFO] 19:47:45 ts-node-dev ver. 2.0.0 (using ts-node ver. 10.9.2, typescript ver. 5.9.3)
+Server running on http://localhost:3001
+Error: NEXTCLOUD_URL not configured
+    at listPieces (/home/stefan/Dokumente/Programmieren lernen/OpenMusikVerein/server/src/services/webdavService.ts:23:29)
+    at /home/stefan/Dokumente/Programmieren lernen/OpenMusikVerein/server/src/routes/list.ts:8:35
+    at Layer.handle [as handle_request] (/home/stefan/Dokumente/Programmieren lernen/OpenMusikVerein/server/node_modules/express/lib/router/layer.js:95:5)
+    at next (/home/stefan/Dokumente/Programmieren lernen/OpenMusikVerein/server/node_modules/express/lib/router/route.js:149:13)
+    at Route.dispatch (/home/stefan/Dokumente/Programmieren lernen/OpenMusikVerein/server/node_modules/express/lib/router/route.js:119:3)
+    at Layer.handle [as handle_request] (/home/stefan/Dokumente/Programmieren lernen/OpenMusikVerein/server/node_modules/express/lib/router/layer.js:95:5)
+    at /home/stefan/Dokumente/Programmieren lernen/OpenMusikVerein/server/node_modules/express/lib/router/index.js:284:15
+    at Function.process_params (/home/stefan/Dokumente/Programmieren lernen/OpenMusikVerein/server/node_modules/express/lib/router/index.js:346:12)
+    at next (/home/stefan/Dokumente/Programmieren lernen/OpenMusikVerein/server/node_modules/express/lib/router/index.js:280:10)
+    at Function.handle (/home/stefan/Dokumente/Programmieren lernen/OpenMusikVerein/server/node_modules/express/lib/router/index.js:175:3)
+[INFO] 19:49:11 Restarting: /home/stefan/Dokumente/Programmieren lernen/OpenMusikVerein/server/src/services/webdavService.ts has been modified
+Server running on http://localhost:3001
+[INFO] 19:51:50 Restarting: /home/stefan/Dokumente/Programmieren lernen/OpenMusikVerein/server/src/services/webdavService.ts has been modified
+Server running on http://localhost:3001
+Error: NEXTCLOUD_URL not configured
+    at listPieces (/home/stefan/Dokumente/Programmieren lernen/OpenMusikVerein/server/src/services/webdavService.ts:23:29)
+    at /home/stefan/Dokumente/Programmieren lernen/OpenMusikVerein/server/src/routes/list.ts:8:35
+    at Layer.handle [as handle_request] (/home/stefan/Dokumente/Programmieren lernen/OpenMusikVerein/server/node_modules/express/lib/router/layer.js:95:5)
+    at next (/home/stefan/Dokumente/Programmieren lernen/OpenMusikVerein/server/node_modules/express/lib/router/route.js:149:13)
+    at Route.dispatch (/home/stefan/Dokumente/Programmieren lernen/OpenMusikVerein/server/node_modules/express/lib/router/route.js:119:3)
+    at Layer.handle [as handle_request] (/home/stefan/Dokumente/Programmieren lernen/OpenMusikVerein/server/node_modules/express/lib/router/layer.js:95:5)
+    at /home/stefan/Dokumente/Programmieren lernen/OpenMusikVerein/server/node_modules/express/lib/router/index.js:284:15
+    at Function.process_params (/home/stefan/Dokumente/Programmieren lernen/OpenMusikVerein/server/node_modules/express/lib/router/index.js:346:12)
+    at next (/home/stefan/Dokumente/Programmieren lernen/OpenMusikVerein/server/node_modules/express/lib/router/index.js:280:10)
+    at Function.handle (/home/stefan/Dokumente/Programmieren lernen/OpenMusikVerein/server/node_modules/express/lib/router/index.js:175:3)
