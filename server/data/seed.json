@@ -1,0 +1,11 @@
+{
+  "roles": [
+    { "id": "r1", "name": "admin" },
+    { "id": "r2", "name": "mitglied" },
+    { "id": "r3", "name": "notenwart" }
+  ],
+  "members": [
+    { "id": "u1", "name": "Max Mustermann", "roles": ["admin"] },
+    { "id": "u2", "name": "Erika Beispiel", "roles": ["mitglied"] }
+  ]
+}
