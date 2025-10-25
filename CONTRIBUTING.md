@@ -1,5 +1,7 @@
 # 🤝 Mitwirken an OpenMusikVerein
 
+Kurzinfo: ausführliche Beitragsrichtlinien und die PR-Checkliste findest du in `docs/contributing.md`.
+
 Vielen Dank für dein Interesse, dieses Projekt mitzugestalten! Wir freuen uns über Beiträge jeder Art – ob Code, Dokumentation, Tests oder Ideen.
 
 ## 🛠️ So startest du
