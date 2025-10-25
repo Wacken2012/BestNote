@@ -54,3 +54,23 @@ Alle bemerkenswerten Änderungen an diesem Projekt werden in diesem Dokument fes
 - 📚 All documentation now bilingual (German & English)
 
 ---
+
+## [2.1.0] – 2025-10-25
+
+### 🚀 BestNote v2.1.0 — Import Preview, Backup & Retention
+
+### ✨ Highlights
+- Added import preview modal with dry-run support
+- Added backup-before-import option
+- Implemented retention policy (MAX_BACKUPS)
+- Added server-side tests for import and backup
+- Updated documentation and release notes
+
+### 🔒 Breaking Changes
+- Import endpoint changed to `/api/members/import` (replace custom import routes)
+- Router guards now use the auth store store; ensure frontend auth integration
+
+### 🛠 Migration
+- Update any custom import flows to use the dry-run preview
+- Ensure `server/data/backups/` exists and is writable for retention to work
+
