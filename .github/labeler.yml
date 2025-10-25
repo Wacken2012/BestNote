@@ -1,3 +1,14 @@
+feature:
+  - src/**
+bug:
+  - src/**
+docs:
+  - docs/**
+  - README*.md
+tests:
+  - tests/**
+ci:
+  - .github/workflows/**
 tests:
   - "tests/**"
 docs:
