@@ -40,8 +40,8 @@ Dieses Projekt wurde mit Unterstützung von Microsoft Copilot entwickelt. Die KI
 - Teststrategie und CI-Setup
 - Zweisprachiger Dokumentation
 
-## 📸 Screenshots (optional)
-_Füge hier GIFs oder Screenshots der Notenansicht, Kalenderintegration oder Rollenumschaltung ein._
+## 📸 Screenshots (folgt)
+Screenshots folgen sobald das Frontend fertig ist
 
 ## 📄 Lizenz
 GPLv3 – siehe [LICENSE](./LICENSE)
