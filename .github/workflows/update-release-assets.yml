@@ -1,0 +1,55 @@
+name: Update Release Assets
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Tag name (e.g. v2.0.0)'
+        required: true
+      short_body:
+        description: 'Short release summary (will replace the release body)'
+        required: true
+
+jobs:
+  update_release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Update or create release (short body)
+        id: update_release
+        uses: peter-evans/create-or-update-release@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          tag_name: ${{ github.event.inputs.tag }}
+          release_name: ${{ github.event.inputs.tag }}
+          body: ${{ github.event.inputs.short_body }}
+          draft: true
+          prerelease: false
+
+      - name: Delete existing CHANGELOG.md asset (if any)
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const tag = context.payload.inputs.tag
+            // find the release by tag
+            const release = await github.rest.repos.getReleaseByTag({ owner: context.repo.owner, repo: context.repo.repo, tag })
+            const releaseId = release.data.id
+            const assets = await github.rest.repos.listReleaseAssets({ owner: context.repo.owner, repo: context.repo.repo, release_id: releaseId })
+            for (const a of assets.data) {
+              if (a.name === 'CHANGELOG.md') {
+                await github.rest.repos.deleteReleaseAsset({ owner: context.repo.owner, repo: context.repo.repo, asset_id: a.id })
+                core.info(`Deleted existing asset CHANGELOG.md (id=${a.id})`)
+              }
+            }
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload CHANGELOG.md as asset
+        uses: actions/upload-release-asset@v1
+        with:
+          upload_url: ${{ steps.update_release.outputs.upload_url }}
+          asset_path: CHANGELOG.md
+          asset_name: CHANGELOG.md
+          asset_content_type: text/markdown

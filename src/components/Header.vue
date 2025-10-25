@@ -2,20 +2,34 @@
   <header class="app-header">
     <h1>{{ $t('app.title') }}</h1>
     <div class="controls">
-      <select v-model="lang" @change="changeLang">
-        <option value="de">DE</option>
-        <option value="en">EN</option>
-      </select>
-    </div>
+        <select v-model="lang" @change="changeLang">
+          <option value="de">DE</option>
+          <option value="en">EN</option>
+        </select>
+        <div class="auth">
+          <template v-if="auth.isAuthenticated">
+            <span class="user">{{ auth.viewer.name || auth.viewer.id }}</span>
+            <button @click="logout">Logout</button>
+          </template>
+          <template v-else>
+            <Login />
+          </template>
+        </div>
+      </div>
   </header>
 </template>
 
 <script lang="ts" setup>
 import { ref } from 'vue'
 import { useI18n } from 'vue-i18n'
+import Login from './Login.vue'
+import { useAuthStore } from '../store/auth'
+import Toasts from './Toasts.vue'
 const { locale } = useI18n()
 const lang = ref(locale.value)
 function changeLang() { locale.value = lang.value }
+const auth = useAuthStore()
+function logout() { auth.clear(); window.location.href = '/library' }
 </script>
 
 <style scoped>

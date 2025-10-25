@@ -1,0 +1,10 @@
+{
+  "added": [],
+  "skipped": [
+    {
+      "reason": "duplicate id",
+      "id": "C2"
+    }
+  ],
+  "errors": []
+}

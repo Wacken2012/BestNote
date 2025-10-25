@@ -11,11 +11,35 @@ echo "=== BestNote local setup helper ==="
 read -p "Jameica install path (leave empty to skip) [ /opt/jameica ]: " JAMEICA_PATH
 JAMEICA_PATH=${JAMEICA_PATH:-/opt/jameica}
 
+if [ -d "$ROOT_DIR/vendor/jverein" ]; then
+  echo "Found vendor/jverein — local jVerein fork appears present. Ensure Jameica is installed and configured to use it if needed."
+else
+  echo "vendor/jverein not found. To use a local jVerein fork place it at vendor/jverein/ or follow SETUP_README.md to install jVerein."
+fi
+
+if [ -d "$ROOT_DIR/vendor/nextcloud" ]; then
+  echo "Found vendor/nextcloud — a local Nextcloud fork is available for integration testing. Consider running it in Docker for WebDAV tests."
+else
+  echo "vendor/nextcloud not found. For local Nextcloud testing see SETUP_README.md (Docker setup recommended)."
+fi
+
 read -p "Nextcloud WebDAV URL (e.g. https://nextcloud.example/remote.php/dav/files/username/) [skip]: " NEXTCLOUD_URL
 if [ -n "$NEXTCLOUD_URL" ]; then
   read -p "Nextcloud username: " NEXTCLOUD_USER
   read -s -p "Nextcloud password: " NEXTCLOUD_PASS
   echo
+  # quick validation via curl (if available)
+  if command -v curl >/dev/null 2>&1; then
+    echo "Testing WebDAV connection to $NEXTCLOUD_URL ..."
+    HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" -u "$NEXTCLOUD_USER:$NEXTCLOUD_PASS" "$NEXTCLOUD_URL") || HTTP_STATUS=000
+    if [ "$HTTP_STATUS" -ge 200 ] && [ "$HTTP_STATUS" -lt 400 ]; then
+      echo "WebDAV reachable (HTTP $HTTP_STATUS)"
+    else
+      echo "Warning: WebDAV test returned HTTP $HTTP_STATUS — check URL/credentials"
+    fi
+  else
+    echo "curl not found; cannot test WebDAV connectivity. Install curl or test manually."
+  fi
 fi
 
 echo "Writing configuration to $SERVER_ENV"

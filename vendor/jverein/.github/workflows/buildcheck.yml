@@ -1,0 +1,31 @@
+# This workflow will build a Java project with Ant
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-java-with-ant
+
+name: OpenJVerein build check
+
+on:
+  pull_request:
+    types: [opened, reopened, synchronize, edited]
+    paths:
+      - 'plugin.xml'
+      - 'build/**'
+      - 'lib/**'
+      - 'lib.src/**'
+      - 'src/**'
+      - '.github/workflows/**/*.yml'
+      - '.github/actions/**/*.yml'
+  push:
+jobs:
+  build-check:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout openjverein
+      uses: actions/checkout@v5
+      with:
+        path: jverein
+
+    - name: Setup
+      uses: ./jverein/.github/actions/build-dependencies
+
+    - name: Build openjverein plugin
+      run: ant -noinput -buildfile jverein/build/build.xml test

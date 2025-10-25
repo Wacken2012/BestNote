@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import { nextTick } from 'vue'
 import { shallowMount } from '@vue/test-utils'
-import { createTestingPinia } from '@pinia/testing'
+import { createPinia } from 'pinia'
 import { useUserStore } from '../../src/store/user'
 import vCanPiece from '../../src/directives/canPiece'
 
@@ -12,7 +12,7 @@ const TestComponent = {
 
 describe('v-can-piece directive', () => {
   it('shows element if user has access to piece', async () => {
-    const pinia = createTestingPinia()
+  const pinia = createPinia()
     const wrapper = shallowMount(TestComponent, {
       props: {
         piece: { id: 1, voice: 'Tenor' }
@@ -31,7 +31,7 @@ describe('v-can-piece directive', () => {
   })
 
   it('hides element if user lacks access to piece', async () => {
-    const pinia = createTestingPinia()
+  const pinia = createPinia()
     const wrapper = shallowMount(TestComponent, {
       props: {
         piece: { id: 1, voice: 'Tenor' }

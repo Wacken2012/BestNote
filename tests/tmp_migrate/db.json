@@ -1,0 +1,12 @@
+{
+  "members": [
+    {
+      "id": "a",
+      "firstname": "A"
+    },
+    {
+      "id": "b",
+      "firstname": "B"
+    }
+  ]
+}

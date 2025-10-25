@@ -100,3 +100,162 @@ If you'd like, I can also commit these changes and push them to the configured r
 ## 🧪 Test strategy
 
 See section [Test strategy for custom directives](#test-strategy-for-custom-directives)
+
+## CLI: Importer & Migration scripts
+
+This project includes small Node.js helper scripts in `scripts/` to import and migrate member data.
+
+````markdown
+# OpenMusikVerein / BestNote
+
+Diese Datei ist zweisprachig. | This file is bilingual.
+
+🇩🇪 Deutsch | 🇬🇧 English below
+
+---
+
+## 🇩🇪 Deutsch
+
+### 🧩 Projektübersicht
+BestNote — KI-gestütztes Noten- und Kalenderverwaltungssystem für Musikvereine.
+
+### 🎯 Projektziel
+BestNote vereinfacht die Organisation von Musikgruppen durch rollenbasierten Zugriff auf Noten, Kalender und Uploads. Es kombiniert moderne Webtechnologien mit KI-gestützter Entwicklung für Wartbarkeit und Erweiterbarkeit.
+
+### ✨ Features
+- Rollenmatrix mit granularer Berechtigung (Mitglied, Dirigent, Vorstand, Kassierer, Notenwart, Admin)
+- Zugriff auf Noten nach Stimme und Rolle
+- Kalenderintegration (CalDAV-kompatibel)
+- Upload-Logik mit `v-can-upload` Directive
+- Reaktive Berechtigungsprüfung via Pinia
+- Testabdeckung mit Vitest
+- CI-Workflow mit GitHub Actions
+
+### 🧩 Rollenmatrix
+| Rolle       | Notenzugriff               | Upload | Kalender | Admin |
+|-------------|----------------------------|--------|----------|--------|
+| Mitglied    | Eigene Stimme              | ❌     | ✅       | ❌     |
+| Dirigent    | Alle Stimmen               | ❌     | ✅       | ❌     |
+| Notenwart   | Alle Stimmen               | ✅     | ✅       | ❌     |
+| Vorstand    | Alle Stimmen               | ❌     | ✅       | ❌     |
+| Kassierer   | Eigene Stimme (wenn Musiker) | ❌   | ✅       | ❌     |
+| Admin       | Alle                       | ✅     | ✅       | ✅     |
+
+### 🧪 Teststrategie
+Siehe Abschnitt [Teststrategie für Custom Directives](#teststrategie-für-custom-directives)
+
+### 🤖 KI-Herkunft
+Das Projekt wurde mit Unterstützung von KI-gestützten Tools entwickelt (z. B. GitHub Copilot). Alle automatisch generierten Inhalte wurden geprüft.
+
+### 📄 Lizenz
+GPLv3 – siehe [LICENSE](./LICENSE)
+
+### 🤝 Mitwirken
+Siehe [CONTRIBUTING.md](./CONTRIBUTING.md)
+
+---
+
+## 🇬🇧 English
+
+### 🧩 Project overview
+BestNote — AI-assisted sheet-music and calendar management for music clubs.
+
+### 🎯 Project goal
+BestNote simplifies organizing music groups by providing role-based access to sheet music, calendars, and uploads. It combines modern web technologies with AI-assisted development for maintainability and extensibility.
+
+### ✨ Features
+- Role matrix with granular permissions (Member, Conductor, Board, Treasurer, Librarian, Admin)
+- Access to sheet music by voice and role
+- Calendar integration (CalDAV-compatible)
+- Upload logic via `v-can-upload` directive
+- Reactive permission checks using Pinia
+- Tests with Vitest
+- CI workflow with GitHub Actions
+
+### 🧩 Role matrix
+| Role        | Sheet access               | Upload | Calendar | Admin |
+|-------------|----------------------------|--------|----------|-------|
+| Member      | Own voice                  | ❌     | ✅       | ❌    |
+| Conductor   | All voices                 | ❌     | ✅       | ❌    |
+| Librarian   | All voices                 | ✅     | ✅       | ❌    |
+| Board       | All voices                 | ❌     | ✅       | ❌    |
+| Treasurer   | Own voice (if musician)    | ❌     | ✅       | ❌    |
+| Admin       | All                        | ✅     | ✅       | ✅    |
+
+### 🧪 Test strategy
+See section [Test strategy for custom directives](#test-strategy-for-custom-directives)
+
+### 📄 License
+GPLv3 – see [LICENSE](./LICENSE)
+
+### 🤝 Contributing
+See [CONTRIBUTING.md](./CONTRIBUTING.md)
+
+---
+
+## 🧪 Teststrategy for Custom Directives
+This project uses Vue directives like `v-can-upload` that react to Pinia store data.
+
+### Example: test for `v-can-upload`
+- Use `Vue Test Utils` + `Vitest` with `jsdom`
+- Ensure directive and test use the same Pinia instance
+- Change roles in tests with `userStore.$patch(...)`
+- Use `nextTick()` and, if necessary, `setTimeout(0)` for reactive DOM updates
+- Check visibility via `el.style.display` instead of `isVisible()`
+
+---
+
+## CLI: Importer & Migration scripts
+
+This project includes small Node.js helper scripts in `scripts/` to import and migrate member data.
+
+### 1) Importer: `scripts/import_jverein.js`
+
+- Purpose: Parse CSV or XML exports (jVerein) and validate using JSON Schema (`schemas/member.schema.json`).
+- Usage:
+
+```bash
+# basic import from CSV to JSON
+node scripts/import_jverein.js path/to/input.csv server/data/imported_members.json
+
+# dry-run (validate only, no output members file)
+node scripts/import_jverein.js path/to/input.csv server/data/imported_members.json --dry-run
+```
+
+- Outputs:
+  - `server/data/import_report.json` and `import_report.md` with skipped/invalid records.
+  - `server/data/imported_members.json` when run without `--dry-run`.
+
+### 2) Migration: `scripts/migrate_imported_members.js`
+
+- Purpose: Merge `server/data/imported_members.json` into the persistent `server/data/db.json`.
+- CLI flags:
+  - `--dry-run` – validate and write reports but do not modify `db.json`.
+  - `--strategy=skip|overwrite` – how to handle duplicates (default: skip).
+  - `--key=id|name` – which field to treat as unique key (default: id).
+  - `--confirm` – skip interactive confirmation and proceed.
+
+- Example usage:
+
+```bash
+# dry-run with skip strategy (default)
+node scripts/migrate_imported_members.js --dry-run
+
+# apply migration and overwrite duplicates by id
+node scripts/migrate_imported_members.js --strategy=overwrite --key=id --confirm
+```
+
+- Outputs:
+  - `server/data/migration_report.json` with added/skipped entries and errors.
+  - Backup of original `server/data/db.json` at `server/data/db.json.backup.<timestamp>`.
+
+### Migration & Backup
+- Backups are stored in `server/data/backups/` and named `db.backup.<timestamp>.json`.
+- The migration script keeps up to 5 backups; older backups are deleted automatically.
+- Use `--dry-run` to test migration without modifying `db.json`.
+
+### Environment
+- To control whether the dashboard is embedded by default, set `VITE_SHOW_DASHBOARD=true` in your `.env` or `.env.local`. See `.env.example` for reference.
+
+````
+

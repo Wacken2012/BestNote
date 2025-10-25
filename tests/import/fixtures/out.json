@@ -1,0 +1,14 @@
+[
+  {
+    "id": "m1",
+    "name": "Max Mustermann",
+    "role": "admin",
+    "entryDate": "2020-01-01"
+  },
+  {
+    "id": "m2",
+    "name": "Erika Beispiel",
+    "role": "mitglied",
+    "entryDate": "2021-05-12"
+  }
+]

@@ -1,0 +1,59 @@
+name: Test Importer
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'tests/import/**'
+      - 'scripts/import_jverein.js'
+      - 'scripts/**'
+
+  pull_request:
+    paths:
+      - 'tests/import/**'
+      - 'scripts/import_jverein.js'
+      - 'scripts/**'
+
+jobs:
+  test-importer:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [18.x, 20.x]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Cache node modules
+        uses: actions/cache@v4
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ matrix.node-version }}-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-${{ matrix.node-version }}-
+
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: Install dependencies (npm ci or fallback)
+        run: |
+          npm ci --if-present || npm install
+
+      - name: Run importer tests
+        run: npm run test:importer
+
+      - name: Upload import report artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: import-report
+          path: server/data/import_report.json
+
+      - name: Upload migration report artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: migration-report
+          path: server/data/migration_report.json

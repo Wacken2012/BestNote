@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import { nextTick } from 'vue'
 import { shallowMount } from '@vue/test-utils'
-import { createTestingPinia } from '@pinia/testing'
+import { createPinia } from 'pinia'
 import { useUserStore } from '../../src/store/user'
 import vCanCalendar from '../../src/directives/canCalendar'
 
@@ -11,7 +11,7 @@ const TestComponent = {
 
 describe('v-can-calendar directive', () => {
   it('shows element for allowed roles', async () => {
-    const pinia = createTestingPinia()
+  const pinia = createPinia()
     const wrapper = shallowMount(TestComponent, {
       global: { plugins: [pinia], directives: { 'can-calendar': vCanCalendar } }
     })
@@ -24,7 +24,7 @@ describe('v-can-calendar directive', () => {
   })
 
   it('hides element for disallowed roles', async () => {
-    const pinia = createTestingPinia()
+  const pinia = createPinia()
     const wrapper = shallowMount(TestComponent, {
       global: { plugins: [pinia], directives: { 'can-calendar': vCanCalendar } }
     })

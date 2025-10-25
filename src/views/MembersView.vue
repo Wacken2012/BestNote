@@ -1,3 +1,9 @@
-<template><div><h2>Mitglieder (TODO)</h2></div></template>
+<template>
+	<div>
+		<MembersList />
+	</div>
+</template>
 
-<script lang="ts" setup></script>
+<script lang="ts" setup>
+import MembersList from '../components/MembersList.vue'
+</script>
