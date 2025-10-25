@@ -68,3 +68,23 @@ export function canAccessCalendar(user: User): boolean {
       return false
   }
 }
+
+/**
+ * Minimal generic permission check used by template directives.
+ * This is intentionally small and conservative: Admin always wins, otherwise
+ * check a few common permission strings against roles.
+ */
+export function can(permission: string, roles?: Role[]): boolean {
+  if (!roles || roles.length === 0) return false
+  if (roles.includes(Role.Admin)) return true
+
+  switch (permission) {
+    case 'add_piece':
+    case 'upload_piece':
+    case 'add_piece_modal':
+    case 'create_setlist':
+      return roles.includes(Role.Notenwart) || roles.includes(Role.Dirigent)
+    default:
+      return false
+  }
+}

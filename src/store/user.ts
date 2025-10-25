@@ -1,6 +1,5 @@
 import { defineStore } from 'pinia'
-
-export type Role = 'admin'|'notenwart'|'dirigent'|'kassierer'|'vorstand'|'mitglied'
+import { Role } from '../services/PermissionService'
 
 export const useUserStore = defineStore('user', {
   state: () => ({
@@ -23,10 +22,10 @@ export const useUserStore = defineStore('user', {
     setLanguage(lang: string) { this.language = lang }
   },
   getters: {
-    isAdmin: (state) => state.roles.includes('admin')
+    isAdmin: (state) => state.roles.includes(Role.Admin)
     ,
     primaryRole: (state) => {
-      const priority = ['admin','notenwart','dirigent','vorstand','kassierer','mitglied'] as Role[]
+      const priority = [Role.Admin, Role.Notenwart, Role.Dirigent, Role.Vorstand, Role.Kassierer, Role.Mitglied] as Role[]
       for (const p of priority) {
         if (state.roles.includes(p)) return p
       }
