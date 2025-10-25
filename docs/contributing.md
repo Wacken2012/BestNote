@@ -24,13 +24,13 @@ Willkommen bei BestNote! Dieses Projekt freut sich über Beiträge von Musikern,
 ## ✅ PR-Checkliste
 Bitte vor dem Pull Request:
 
-[ ] Tests laufen lokal (npm run test)
+- [ ] Tests laufen lokal (npm run test)
 
-[ ] Neue Funktionen sind getestet
+- [ ] Neue Funktionen sind getestet
 
-[ ] Dokumentation (README oder docs/) aktualisiert
+- [ ] Dokumentation (README oder docs/) aktualisiert
 
-[ ] Commit-Nachricht ist klar und prägnant
+- [ ] Commit-Nachricht ist klar und prägnant
 
 ## 📘 Weitere Hinweise
 Lizenz: GPLv3
