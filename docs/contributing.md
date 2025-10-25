@@ -1,8 +1,22 @@
 # 🤝 Mitwirken an BestNote
 
-Willkommen bei BestNote! Dieses Projekt freut sich über Beiträge von Musikern, Entwicklern und Open-Source-Enthusiasten.
+Willkommen bei BestNote – einem KI-gestützten Noten- und Kalenderverwaltungssystem für Musikvereine. Dieses Projekt freut sich über Beiträge von Musiker:innen, Entwickler:innen und Open-Source-Enthusiast:innen.
 
-## 🧭 Branch-Konventionen
+## 🧭 Projektüberblick
+
+- Modularer Aufbau (Directives, Services, Stores)
+- Rollenbasierte Berechtigungen
+- Mehrsprachige Dokumentation
+- Vollständig testbar mit Vitest
+
+## 🛠 Mitwirkungsregeln
+
+- Bitte respektiere die Branch-Konventionen
+- Schreibe klare Commits (`type(scope): message`)
+- Dokumentiere neue Features in `README` oder `docs/`
+- Teste neue Funktionen mit Vitest
+
+## 🌿 Branch-Konventionen
 
 - `main`: stabile Produktionsbasis
 - `feature/xyz`: neue Features
@@ -11,30 +25,39 @@ Willkommen bei BestNote! Dieses Projekt freut sich über Beiträge von Musikern,
 
 ## 🧪 Tests
 
-- Testdateien liegen unter `tests/`
+- Teststruktur: `tests/`
+- Globale Initialisierung: `tests/setup.ts`
 - Direktiven: `tests/directives/`
 - Services: `tests/services/`
-- Globale Testinitialisierung: `tests/setup.ts` mit `createTestingPinia()`
-- Tests ausführen:
-  ```bash
-  npm run test
-  npm run test -- --coverage
-  ```
+- Testausführung:
+
+```bash
+npm run test
+npm run test -- --coverage
+```
 
 ## ✅ PR-Checkliste
-Bitte vor dem Pull Request:
 
-- [ ] Tests laufen lokal (npm run test)
-
+- [ ] Tests laufen lokal
 - [ ] Neue Funktionen sind getestet
+- [ ] Dokumentation aktualisiert
+- [ ] Commit-Nachricht ist klar
+- [ ] Branch-Konvention eingehalten
 
-- [ ] Dokumentation (README oder docs/) aktualisiert
+## � Release-Hinweise
 
-- [ ] Commit-Nachricht ist klar und prägnant
+Bitte beachte `RELEASE.md` für alle Schritte zur Veröffentlichung.
 
-## 📘 Weitere Hinweise
-Lizenz: GPLv3
+## 📜 Lizenz
 
-Sprache: Deutsch & Englisch
+Dieses Projekt steht unter der GPLv3.
 
-Doku: siehe README.de.md und README.en.md
+---
+
+### 💾 Commit-Vorschlag
+
+```bash
+git add docs/contributing.md
+git commit -m "docs: finalize contributing guide with onboarding and PR checklist"
+git push
+```
