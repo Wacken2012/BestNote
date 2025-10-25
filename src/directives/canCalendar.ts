@@ -7,10 +7,15 @@ export default {
       const userStore = useUserStore()
 
       const updateVisibility = () => {
-        const role = userStore.primaryRole
-        const user = { role }
-        const allowed = canAccessCalendar(user as any)
-        el.style.display = allowed ? '' : 'none'
+        try {
+          const role = userStore.primaryRole
+          const user = { role }
+          const allowed = canAccessCalendar(user as any)
+          el.style.display = allowed ? '' : 'none'
+        } catch (err) {
+          // hide on any error during evaluation
+          el.style.display = 'none'
+        }
       }
 
       updateVisibility()
@@ -18,7 +23,12 @@ export default {
       setTimeout(() => updateVisibility(), 0)
 
       const stop = userStore.$subscribe(() => {
-        updateVisibility()
+        try {
+          updateVisibility()
+        } catch (e) {
+          // swallow to avoid breaking host app/tests; ensure element hidden
+          el.style.display = 'none'
+        }
       })
 
       ;(el as any).__vCanCalendarStop = stop
