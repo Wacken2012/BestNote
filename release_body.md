@@ -25,3 +25,12 @@
 - 📚 All documentation now bilingual (German & English)
 
 ---
+
+### Additions since v2.0.0
+
+- Import preview UI: vendor import now supports a dry-run preview modal and a confirm flow (VendorImport.vue).
+- Server endpoint: POST `/api/members/import` supports `?dry=true` and writes to `server/data/imported_members.json` when committed.
+- Tests: `tests/api.import.test.ts` adds dry-run and commit tests validating counts and file persistence.
+- UX: toast notifications and modal confirmation to prevent accidental imports.
+
+Commit reference: `63c5e0c`
