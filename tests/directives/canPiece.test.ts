@@ -1,8 +1,9 @@
-import { describe, it, expect, nextTick } from 'vitest'
+import { describe, it, expect } from 'vitest'
+import { nextTick } from 'vue'
 import { shallowMount } from '@vue/test-utils'
 import { createTestingPinia } from '@pinia/testing'
-import { useUserStore } from '@/store/user'
-import vCanPiece from '@/directives/canPiece'
+import { useUserStore } from '../../src/store/user'
+import vCanPiece from '../../src/directives/canPiece'
 
 const TestComponent = {
   props: ['piece'],
@@ -23,7 +24,7 @@ describe('v-can-piece directive', () => {
     })
 
     const userStore = useUserStore()
-    userStore.$patch({ primaryRole: 'Admin' })
+  userStore.$patch({ roles: ['admin'] })
 
     await nextTick()
     expect(wrapper.element.style.display).not.toBe('none')
@@ -42,7 +43,7 @@ describe('v-can-piece directive', () => {
     })
 
     const userStore = useUserStore()
-    userStore.$patch({ primaryRole: 'Mitglied' }) // ohne passende Stimme
+  userStore.$patch({ roles: ['mitglied'] }) // ohne passende Stimme
 
     await nextTick()
     expect(wrapper.element.style.display).toBe('none')
