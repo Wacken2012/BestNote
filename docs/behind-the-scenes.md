@@ -33,6 +33,32 @@ Dieses Projekt (BestNote) wurde iterativ in kurzer Zeit aufgebaut, getestet und 
 ### Ziel
 Ein einladendes, gut dokumentiertes und kollaboratives Open-Source-Projekt, das Contributors schnell onboardet und wiederkehrende Aufgaben automatisiert.
 
+## 🧩 Fortschrittseintrag — Backup vor Import + UX Polish
+
+✅ Was umgesetzt wurde:
+
+### VendorImport.vue
+- Checkbox „Backup vor Import erstellen"
+- Spinner/Statusanzeige bei Vorschau und Commit
+- Buttons deaktiviert während Import
+- Toasts für Erfolg/Fehler via useNotify.push()
+
+### members.ts
+- Wenn `backup: true`, wird vor dem Import ein Snapshot erzeugt:
+	- bevorzugt: Kopie von `imported_members.json`
+	- fallback: Kopie von `db.json`
+	- Notfall: `members_snapshot.backup.<timestamp>.json`
+- Backup-Dateien landen in `server/data/backups/`
+
+### Tests (api.import.test.ts)
+- Backup-Datei-Erstellung wird geprüft
+- Cleanup vor/nach jedem Testlauf
+- Test-Suite vollständig grün: 16 Dateien, 52 Tests
+
+Ziel:
+Dokumentation des Meilensteins „sicherer Import mit Backup und UX-Politur“ für Nachvollziehbarkeit, Review und Release-Vorbereitung.
+
+
 ---
 
 ## English: Behind the Scenes – AI-assisted development
