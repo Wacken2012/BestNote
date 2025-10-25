@@ -24,6 +24,7 @@ describe('PermissionService', () => {
 
     it('denies access for undefined/unknown role', () => {
       // simulate an unknown role at runtime
+      // non-functional comment added to trigger PR labeler test
       const user = { role: 'gast' as unknown as Role }
       expect(canAccessCalendar(user)).toBe(false)
     })
