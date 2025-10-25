@@ -16,6 +16,21 @@ Vielen Dank für dein Interesse, dieses Projekt mitzugestalten! Wir freuen uns �
 
 Bitte prüfe vor dem PR:
 
+[ ] Tests laufen lokal (npm run test)
+
+[ ] Neue Funktionen sind getestet
+
+[ ] Dokumentation (README oder docs/) aktualisiert
+
+[ ] Commit-Nachricht ist klar und prägnant
+
+## 📘 Weitere Hinweise
+Lizenz: GPLv3
+
+Sprache: Deutsch & Englisch
+
+Doku: siehe README.de.md und README.en.md
+
 ## KI / AI-Provenance
 
 Ein Teil dieses Repositories wurde mit Hilfe von KI-gestützten Tools erstellt (z. B. GitHub Copilot). Alle generierten Inhalte wurden vom Projektinitiator geprüft und bei Bedarf manuell angepasst. Wenn du Beiträge einreichst, kennzeichne bitte deutlich, ob Teile deines Beitrags automatisiert erzeugt wurden.
