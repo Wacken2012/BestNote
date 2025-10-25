@@ -30,11 +30,9 @@ describe('v-can-calendar directive', () => {
     })
 
     const userStore = useUserStore()
-    // simulate an unknown/disallowed role at runtime by overriding the getter
-    Object.defineProperty(userStore, 'primaryRole', {
-      get: () => 'gast',
-      configurable: true
-    })
+    // provoke a runtime error in the primaryRole getter by setting roles to null
+    // the directive catches errors and should hide the element
+    userStore.$patch({ roles: null as any })
 
     await nextTick()
     expect(wrapper.element.style.display).toBe('none')
