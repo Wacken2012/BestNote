@@ -1,0 +1,13 @@
+tests:
+  - "tests/**"
+docs:
+  - "docs/**"
+  - "README*.md"
+ci:
+  - ".github/workflows/**"
+directives:
+  - "src/directives/**"
+services:
+  - "src/services/**"
+stores:
+  - "src/stores/**"
