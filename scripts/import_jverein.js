@@ -1,10 +1,29 @@
 #!/usr/bin/env node
 const fs = require('fs')
 const path = require('path')
-const csv = require('csv-parse/lib/sync')
+const { parse } = require('csv-parse/sync')
+const Ajv = require('ajv')
+const ajv = new Ajv({ allErrors: true })
+
+const memberSchema = {
+  type: 'object',
+  properties: {
+    id: { type: 'string' },
+    name: { type: 'string', minLength: 1 },
+    role: { type: 'string' },
+    entryDate: { type: 'string', pattern: '^\\d{4}-\\d{2}-\\d{2}$' }
+  },
+  required: ['id', 'name'],
+  additionalProperties: false
+}
+
+const validate = ajv.compile(memberSchema)
 const { parseStringPromise } = require('xml2js')
 
-const [,, inputPath, outPath] = process.argv
+const args = process.argv.slice(2)
+const inputPath = args[0]
+const outPath = args[1]
+const dryRun = args.includes('--dry-run')
 if (!inputPath || !outPath) {
   console.error('Usage: import_jverein.js <input.csv|xml> <out.json>')
   process.exit(2)
@@ -21,14 +40,22 @@ function validateRecord(rec) {
 
 function parseCsv(file) {
   const raw = fs.readFileSync(file, 'utf8')
-  const records = csv(raw, { columns: true, skip_empty_lines: true })
+  const records = parse(raw, { columns: true, skip_empty_lines: true })
   const out = []
   for (let i = 0; i < records.length; i++) {
     const r = records[i]
     const rec = { id: `m${i+1}`, name: r['Name'] || `${r['Vorname'] || ''} ${r['Nachname'] || ''}`.trim(), role: r['Role'] || r['Rolle'] || '', entryDate: r['Eintritt'] || r['entryDate'] || '' }
     const errs = validateRecord(rec)
     if (errs.length) {
-      console.error(`Record ${i+1} invalid: ${errs.join(', ')}`)
+      console.error(`Record ${i+1} invalid (pre-schema): ${errs.join(', ')}`)
+      continue
+    }
+    const ok = validate(rec)
+    if (!ok) {
+      console.error(`Record ${i+1} failed schema validation:`)
+      for (const e of validate.errors) {
+        console.error(` - ${e.instancePath || '/'}: ${e.message}`)
+      }
       continue
     }
     out.push(rec)
@@ -50,7 +77,15 @@ async function parseXml(file) {
     const rec = { id: `m${i+1}`, name, role, entryDate }
     const errs = validateRecord(rec)
     if (errs.length) {
-      console.error(`XML record ${i+1} invalid: ${errs.join(', ')}`)
+      console.error(`XML record ${i+1} invalid (pre-schema): ${errs.join(', ')}`)
+      continue
+    }
+    const ok = validate(rec)
+    if (!ok) {
+      console.error(`XML record ${i+1} failed schema validation:`)
+      for (const e of validate.errors) {
+        console.error(` - ${e.instancePath || '/'}: ${e.message}`)
+      }
       continue
     }
     members.push(rec)
@@ -68,9 +103,14 @@ async function parseXml(file) {
       process.exit(2)
     }
 
-    fs.mkdirSync(path.dirname(outPath), { recursive: true })
-    fs.writeFileSync(outPath, JSON.stringify(out, null, 2), 'utf8')
-    console.log('Imported', out.length, 'members to', outPath)
+    console.log('Imported', out.length, 'valid members')
+    if (!dryRun) {
+      fs.mkdirSync(path.dirname(outPath), { recursive: true })
+      fs.writeFileSync(outPath, JSON.stringify(out, null, 2), 'utf8')
+      console.log('Wrote output to', outPath)
+    } else {
+      console.log('Dry-run mode: no file written')
+    }
   } catch (err) {
     console.error('Import failed:', err && err.message ? err.message : err)
     process.exit(1)

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<members>
+  <member>
+    <name>Max Mustermann</name>
+    <role>admin</role>
+    <entryDate>2020-01-01</entryDate>
+  </member>
+  <member>
+    <name>Erika Beispiel</name>
+    <role>mitglied</role>
+    <entryDate>2021-05-12</entryDate>
+  </member>
+</members>
