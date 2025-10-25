@@ -1,3 +1,4 @@
+<!-- English PR template -->
 # 📝 Pull Request
 
 ## 📋 Summary

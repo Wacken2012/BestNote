@@ -2,14 +2,6 @@
 name: Pull request
 about: Bitte fülle die Checkliste aus, bevor du einen PR erstellst
 
-## Beschreibung
-
-## Checkliste vor dem Mergen
----
-name: Pull request
-about: Bitte fülle die Checkliste aus, bevor du einen PR erstellst
----
-
 # 📝 Pull Request
 
 ## 📋 Zusammenfassung
@@ -29,4 +21,3 @@ about: Bitte fülle die Checkliste aus, bevor du einen PR erstellst
 
 ## Hinweise für Reviewer
 (Optional) Wichtige Hinweise, Limitations oder TODOs.
-
