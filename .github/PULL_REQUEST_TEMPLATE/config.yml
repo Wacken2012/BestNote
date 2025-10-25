@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: "🇩🇪 Deutsch – PR-Vorlage"
+    url: .github/PULL_REQUEST_TEMPLATE/de.md
+    about: Verwende diese Vorlage für deutschsprachige Beiträge.
+  - name: "🇬🇧 English – PR Template"
+    url: .github/PULL_REQUEST_TEMPLATE/en.md
+    about: Use this template for English-language contributions.
