@@ -29,8 +29,9 @@ describe('v-can-calendar directive', () => {
       global: { plugins: [pinia], directives: { 'can-calendar': vCanCalendar } }
     })
 
-    const userStore = useUserStore()
-    userStore.$patch({ roles: [] })
+  const userStore = useUserStore()
+  // simulate an unknown/disallowed role at runtime
+  userStore.$patch({ roles: ['gast' as any] })
 
     await nextTick()
     expect(wrapper.element.style.display).toBe('none')
