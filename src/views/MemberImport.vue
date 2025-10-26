@@ -4,7 +4,7 @@
     <p class="muted">{{ t('import.description') }}</p>
 
     <section aria-labelledby="import-controls">
-      <label for="import-file">{{ t('import.choose_file') }}</label>
+      <label id="import-controls" for="import-file">{{ t('import.choose_file') }}</label>
       <input id="import-file" type="file" accept="application/json" @change="onFile" aria-label="Import JSON file" />
 
       <label class="checkbox">
@@ -13,7 +13,7 @@
       </label>
 
       <div class="actions">
-        <button class="btn" @click="startImport" :disabled="!file || loading">{{ t('import.start_import') }}</button>
+        <button type="button" class="btn" @click="startImport" :disabled="!file || loading">{{ t('import.start_import') }}</button>
       </div>
 
       <div v-if="loading" role="status" aria-live="polite">{{ t('import.loading') }} <span class="spinner">⏳</span></div>
@@ -123,37 +123,8 @@ async function startImport() {
     loading.value = false
   }
 }
+
 </script>
-
-<script lang="ts">
-// small confirm modal helpers (keeps component local)
-import { ref } from 'vue'
-const showConfirm = ref(false)
-let confirmResolver: ((v: boolean)=>void) | null = null
-function waitForConfirm() {
-  return new Promise<boolean>((res) => { confirmResolver = res; showConfirm.value = true })
-}
-function doConfirm(v:boolean) {
-  showConfirm.value = false
-  if (confirmResolver) confirmResolver(v)
-  confirmResolver = null
-}
-</script>
-
-<template #confirm-modal>
-  <div v-if="showConfirm" class="modal" role="dialog" aria-modal="true" aria-labelledby="confirm-title">
-    <div class="modal-inner">
-      <h2 id="confirm-title">{{ t('import.confirm_title') || 'Confirm import' }}</h2>
-      <p>{{ t('import.confirm_description') || 'Please confirm to write the imported data.' }}</p>
-      <pre class="preview">{{ preview }}</pre>
-      <div class="actions">
-        <button class="btn" @click="doConfirm(false)">{{ t('actions.back') }}</button>
-        <button class="btn primary" @click="doConfirm(true)">{{ t('import.start_import') }}</button>
-      </div>
-    </div>
-  </div>
-</template>
-
 
 <style scoped>
 .preview { background:#f7f7f7; padding:8px; max-height:320px; overflow:auto }
