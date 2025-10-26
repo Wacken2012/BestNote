@@ -36,7 +36,7 @@ import { ref, onMounted } from 'vue'
 import { useUserStore } from '../store/user'
 import { createPinia } from 'pinia'
 import * as PermissionService from '../services/PermissionService'
-import { useI18n } from '../i18n'
+// i18n exports are plain locale objects; avoid importing useI18n here
 
 const pinia = createPinia()
 const userStore = useUserStore(pinia)
@@ -60,8 +60,8 @@ function remove(member) {
 
 function changeLang() {
   try {
-    const { i18n } = useI18n()
-    i18n.locale = lang.value
+    // set document language as minimal runtime effect; the app's i18n store will pick up persisted language elsewhere
+    document.documentElement.lang = lang.value
   } catch (e) {}
 }
 
