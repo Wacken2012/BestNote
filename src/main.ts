@@ -28,6 +28,9 @@ app.directive('can-calendar', vCanCalendar)
 
 app.mount('#app')
 
+// signal to tests that the app has finished client-side initialization (hydration/i18n)
+try { (window as any).__APP_HYDRATED__ = true } catch (e) { /* noop in non-browser env */ }
+
 // keep HTML lang attribute in sync if user changes language later
 try {
 	const { locale } = (i18n as any).global

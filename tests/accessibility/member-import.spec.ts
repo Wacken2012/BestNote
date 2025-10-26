@@ -39,6 +39,12 @@ test.describe('MemberImport accessibility', () => {
       await page.goto(`${base}/import`, { waitUntil: 'networkidle', timeout: 300000 })
       // short delay to let hydration complete
       await page.waitForTimeout(1000)
+      // wait for app hydration signal set by the app once i18n and mounting finished
+      try {
+        await page.waitForFunction(() => (window as any).__APP_HYDRATED__ === true, { timeout: 60000 })
+      } catch (e) {
+        // allow fallback — we still persist debug HTML and diagnostics below
+      }
       // persist debug HTML early so artifacts always contain page HTML
       try {
         await fs.promises.mkdir('playwright-report', { recursive: true })
