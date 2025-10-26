@@ -35,7 +35,7 @@
 import { ref, onMounted } from 'vue'
 import { useUserStore } from '../store/user'
 import { createPinia } from 'pinia'
-import PermissionService from '../services/PermissionService'
+import * as PermissionService from '../services/PermissionService'
 import { useI18n } from '../i18n'
 
 const pinia = createPinia()
