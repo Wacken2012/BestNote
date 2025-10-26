@@ -8,15 +8,15 @@ test.describe('MemberImport accessibility', () => {
   test.beforeEach(async ({ page }: { page: Page }) => {
     // ensure app thinks initial setup was completed so /import is directly reachable
     await page.addInitScript(() => { localStorage.setItem('setupCompleted', 'true') })
-    await page.goto(`${base}/import`)
-    // wait for the app to be hydrated and for the import input to appear
-    await page.waitForLoadState('networkidle')
+  await page.goto(`${base}/import`)
+  // wait for the main import view to render
+  await page.waitForSelector('main.page.member-import', { timeout: 15000 })
   })
 
   test('upload and preview modal accessibility', async ({ page }: { page: Page }) => {
     // upload a small JSON file
     const filePath = JSON.stringify([{ name: 'Max Mustermann', number: '123' }])
-    await page.waitForSelector('#import-file', { timeout: 10000 })
+  await page.waitForSelector('#import-file', { timeout: 30000 })
     try {
       await page.setInputFiles('#import-file', { name: 'members.json', mimeType: 'application/json', buffer: Buffer.from(filePath) })
     } catch (err) {

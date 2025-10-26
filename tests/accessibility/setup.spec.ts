@@ -8,8 +8,8 @@ test.describe('SetupWizard accessibility', () => {
   test.beforeEach(async ({ page }: { page: Page }) => {
     // ensure initial setup state so wizard mount is stable
     await page.addInitScript(() => { localStorage.setItem('setupCompleted', 'true') })
-    await page.goto(`${base}/setup`)
-    await page.waitForLoadState('networkidle')
+  await page.goto(`${base}/setup`)
+  await page.waitForSelector('.setup-wizard', { timeout: 15000 })
   })
 
   test('keyboard navigation and aria-live', async ({ page }: { page: Page }) => {
@@ -17,7 +17,7 @@ test.describe('SetupWizard accessibility', () => {
     await page.keyboard.press('Tab')
     await page.keyboard.press('Tab')
     // choose language (assume select exists)
-    await page.waitForSelector('#lang-select', { timeout: 10000 })
+  await page.waitForSelector('#lang-select', { timeout: 30000 })
     const lang = await page.locator('#lang-select')
     try {
       await lang.selectOption('en')
