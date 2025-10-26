@@ -42,17 +42,21 @@ jobs:
           echo "server did not become ready in time"
           exit 1
 
+      - name: Run debug accessibility capture (guarantee artifacts)
+        run: |
+          echo "Running debug capture test to ensure playwright-report has artifacts"
+          npx playwright test tests/accessibility/debug.spec.ts --project=chromium --reporter=list --timeout=300000 || true
+
       - name: Run accessibility tests (Playwright + axe)
         run: npm run test:accessibility
 
-      - name: Ensure playwright-report and list contents (debug)
+      - name: Ensure playwright-report exists and list contents (debug)
         if: always()
         run: |
-          set -e
           echo "Ensuring playwright-report exists and listing contents"
           mkdir -p playwright-report
           # if empty, write a placeholder so upload action finds at least one file
-          if [ -z "$(ls -A playwright-report)" ]; then echo "placeholder" > playwright-report/placeholder.txt; fi
+          if [ -z "$(ls -A playwright-report 2>/dev/null)" ]; then echo "placeholder" > playwright-report/placeholder.txt; fi
           ls -la playwright-report || true
 
       - name: Upload Playwright report
@@ -60,4 +64,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: playwright-report
-          path: playwright-report || ''
+          path: playwright-report
