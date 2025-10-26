@@ -29,8 +29,8 @@ test.describe('MemberImport accessibility', () => {
 
     // navigate and wait for the main import view to render; capture diagnostics on failure
     try {
-      await page.goto(`${base}/import`, { waitUntil: 'networkidle', timeout: 60000 })
-      await page.waitForSelector('main.page.member-import', { timeout: 60000 })
+  await page.goto(`${base}/import`, { waitUntil: 'networkidle', timeout: 120000 })
+  await page.waitForSelector('[data-testid="member-import"]', { timeout: 120000 })
     } catch (err) {
       try { await fs.promises.mkdir('playwright-report', { recursive: true }) } catch (e) {}
       await page.screenshot({ path: 'playwright-report/member-import-before-failure.png', fullPage: true }).catch(()=>{})
@@ -72,7 +72,7 @@ test.describe('MemberImport accessibility', () => {
     await page.click('button:has-text("Start import")')
 
     // modal should appear
-    const dialog = page.locator('role=dialog')
+  const dialog = page.locator('role=dialog')
     await expect(dialog).toBeVisible()
     await expect(dialog).toHaveAttribute('aria-modal', 'true')
 

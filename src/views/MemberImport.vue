@@ -1,5 +1,5 @@
 <template>
-  <main class="page member-import">
+  <main class="page member-import" data-testid="member-import">
     <h1>{{ t('import.title') }}</h1>
     <p class="muted">{{ t('import.description') }}</p>
 

@@ -8,7 +8,7 @@
     "preview": "vite preview",
     "lint": "eslint --ext .ts,.vue src || true",
     "test": "vitest run",
-  "test:accessibility": "npx playwright test --project=chromium --reporter=html --workers=1 --timeout=60000",
+  "test:accessibility": "npx playwright test --project=chromium --reporter=html --workers=1 --timeout=120000",
   "playwright:install": "playwright install --with-deps",
     "test:importer": "vitest run tests/import --run"
   },

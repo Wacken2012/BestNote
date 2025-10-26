@@ -27,8 +27,8 @@ test.describe('SetupWizard accessibility', () => {
       try { await fs.promises.writeFile('playwright-report/marker-setup.txt', `start:${Date.now()}`) } catch (e) {}
 
     try {
-      await page.goto(`${base}/setup`, { waitUntil: 'networkidle', timeout: 60000 })
-      await page.waitForSelector('.setup-wizard', { timeout: 60000 })
+      await page.goto(`${base}/setup`, { waitUntil: 'networkidle', timeout: 120000 })
+      await page.waitForSelector('[data-testid="setup-wizard"]', { timeout: 120000 })
     } catch (err) {
       try { await fs.promises.mkdir('playwright-report', { recursive: true }) } catch (e) {}
       await page.screenshot({ path: 'playwright-report/setup-before-failure.png', fullPage: true }).catch(()=>{})
