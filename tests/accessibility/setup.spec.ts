@@ -4,24 +4,42 @@ import fs from 'fs'
 
 const base = 'http://localhost:5173'
 
+test.setTimeout(120000)
+
 test.describe('SetupWizard accessibility', () => {
   test.beforeEach(async ({ page }: { page: Page }) => {
     // ensure initial setup state so wizard mount is stable
     await page.addInitScript(() => { localStorage.setItem('setupCompleted', 'true') })
-  await page.goto(`${base}/setup`)
-  // capture console and page errors into a file for diagnostics
-  const logs: string[] = []
-  page.on('console', msg => logs.push(`[console:${msg.type()}] ${msg.text()}`))
-  page.on('pageerror', err => logs.push(`[pageerror] ${err?.message || err}`))
-  try {
-    await page.waitForSelector('.setup-wizard', { timeout: 60000 })
-  } catch (err) {
+
+    // attach console/pageerror handlers and flush to disk
+    const logsPath = 'playwright-report/setup-console.log'
     try { await fs.promises.mkdir('playwright-report', { recursive: true }) } catch (e) {}
-    await page.screenshot({ path: 'playwright-report/setup-before-failure.png', fullPage: true }).catch(()=>{})
-    await fs.promises.writeFile('playwright-report/setup-before-failure.html', await page.content()).catch(()=>{})
-    await fs.promises.writeFile('playwright-report/setup-console.log', logs.join('\n')).catch(()=>{})
-    throw err
-  }
+    await fs.promises.writeFile(logsPath, `=== Playwright logs for setup (start) ===\n`).catch(()=>{})
+    page.on('console', msg => {
+      const line = `[console:${msg.type()}] ${msg.text()}\n`
+      fs.appendFile(logsPath, line, () => {})
+    })
+    page.on('pageerror', err => {
+      const line = `[pageerror] ${err?.message || err}\n`
+      fs.appendFile(logsPath, line, () => {})
+    })
+
+    try {
+      await page.goto(`${base}/setup`, { waitUntil: 'networkidle', timeout: 60000 })
+      await page.waitForSelector('.setup-wizard', { timeout: 60000 })
+    } catch (err) {
+      try { await fs.promises.mkdir('playwright-report', { recursive: true }) } catch (e) {}
+      await page.screenshot({ path: 'playwright-report/setup-before-failure.png', fullPage: true }).catch(()=>{})
+      try {
+        if (!page.isClosed()) {
+          const html = await page.content()
+          await fs.promises.writeFile('playwright-report/setup-before-failure.html', html).catch(()=>{})
+        } else {
+          await fs.promises.writeFile('playwright-report/setup-before-failure.html', '<!-- page closed before content could be read -->').catch(()=>{})
+        }
+      } catch (e) {}
+      throw err
+    }
   })
 
   test('keyboard navigation and aria-live', async ({ page }: { page: Page }) => {
@@ -29,14 +47,21 @@ test.describe('SetupWizard accessibility', () => {
     await page.keyboard.press('Tab')
     await page.keyboard.press('Tab')
     // choose language (assume select exists)
-  await page.waitForSelector('#lang-select', { timeout: 60000 })
+    await page.waitForSelector('#lang-select', { timeout: 60000 })
     const lang = await page.locator('#lang-select')
     try {
       await lang.selectOption('en')
     } catch (err) {
       try { await fs.promises.mkdir('playwright-report', { recursive: true }) } catch (e) {}
       await page.screenshot({ path: 'playwright-report/setup-failure.png', fullPage: true }).catch(()=>{})
-      await fs.promises.writeFile('playwright-report/setup-failure.html', await page.content()).catch(()=>{})
+      try {
+        if (!page.isClosed()) {
+          const html = await page.content()
+          await fs.promises.writeFile('playwright-report/setup-failure.html', html).catch(()=>{})
+        } else {
+          await fs.promises.writeFile('playwright-report/setup-failure.html', '<!-- page closed before content could be read -->').catch(()=>{})
+        }
+      } catch (e) {}
       throw err
     }
     // aria-live should announce language change
@@ -47,7 +72,7 @@ test.describe('SetupWizard accessibility', () => {
     expect(['en','de']).toContain(docLang)
 
     // axe check
-    const accessibilityScanResults = await new AxeBuilder({ page }).analyze()
+  const accessibilityScanResults = await new AxeBuilder({ page: page as any }).analyze()
     expect(accessibilityScanResults.violations.length).toBe(0)
   })
 })
