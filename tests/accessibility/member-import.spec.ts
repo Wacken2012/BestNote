@@ -45,6 +45,15 @@ test.describe('MemberImport accessibility', () => {
       } catch (e) {
         // allow fallback — we still persist debug HTML and diagnostics below
       }
+      // wait for a translated heading text (avoid i18n key like 'members.title')
+      try {
+        await page.waitForFunction(() => {
+          const el = document.querySelector('main[data-testid="member-import"] h1') || document.querySelector('main h1')
+          return !!(el && el.textContent && el.textContent.trim().length > 0 && !el.textContent.includes('.'))
+        }, { timeout: 60000 })
+      } catch (e) {
+        // proceed — we'll persist debug HTML for postmortem
+      }
       // persist debug HTML early so artifacts always contain page HTML
       try {
         await fs.promises.mkdir('playwright-report', { recursive: true })

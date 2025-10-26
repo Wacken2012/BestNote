@@ -47,6 +47,15 @@ test.describe('SetupWizard accessibility', () => {
       } catch (e) {
         // proceed anyway; the subsequent selectors have their own timeouts and we persist debug HTML
       }
+      // also wait until a heading text is translated (heuristic: not an i18n key containing a dot)
+      try {
+        await page.waitForFunction(() => {
+          const el = document.querySelector('[data-testid="setup-wizard"] h2') || document.querySelector('main h1')
+          return !!(el && el.textContent && el.textContent.trim().length > 0 && !el.textContent.includes('.'))
+        }, { timeout: 60000 })
+      } catch (e) {
+        // if this fails we still proceed and persist debug HTML
+      }
       // persist a debug snapshot of the HTML so the CI artifact always contains page HTML
       try {
         await fs.promises.mkdir('playwright-report', { recursive: true })
