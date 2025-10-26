@@ -80,6 +80,11 @@ async function nextStep() {
 onMounted(() => {
   // ensure i18n uses stored language at mount
   if (store.language) locale.value = store.language
+  // signal tests that this important component has mounted and i18n applied
+  try {
+    ;(window as any).APP_READY_FOR_TESTS = true
+    try { console.info('APP_READY_FOR_TESTS set (SetupWizard)') } catch (e) {}
+  } catch (e) { /* noop in non-browser env */ }
 })
 </script>
 

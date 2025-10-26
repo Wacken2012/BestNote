@@ -32,11 +32,19 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
+import { onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useNotify } from '../composables/useNotify'
 import ImportPreviewModal from '../components/ImportPreviewModal.vue'
 
 const { t } = useI18n()
+// small readiness signal for Playwright so tests can wait until this view has mounted
+onMounted(() => {
+  try {
+    ;(window as any).APP_READY_FOR_TESTS = true
+    try { console.info('APP_READY_FOR_TESTS set (MemberImport)') } catch (e) {}
+  } catch (e) { /* noop */ }
+})
 const file = ref<File | null>(null)
 const preview = ref('')
 const createBackup = ref(true)

@@ -28,6 +28,9 @@ app.directive('can-calendar', vCanCalendar)
 
 app.mount('#app')
 
+// default readiness flag for component-level readiness used by Playwright tests
+try { (window as any).APP_READY_FOR_TESTS = false } catch (e) { /* noop in non-browser env */ }
+
 // signal to tests that the app has finished client-side initialization (hydration/i18n)
 ;(async () => {
 	try {

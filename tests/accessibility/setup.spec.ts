@@ -43,7 +43,7 @@ test.describe('SetupWizard accessibility', () => {
       await page.waitForTimeout(1000)
       // wait for app hydration signal set by the app once i18n and mounting finished
       try {
-        await page.waitForFunction(() => (window as any).APP_HYDRATED === true, { timeout: 60000 })
+        await page.waitForFunction(() => (window as any).APP_READY_FOR_TESTS === true, { timeout: 60000 })
       } catch (e) {
         // proceed anyway; the subsequent selectors have their own timeouts and we persist debug HTML
       }
