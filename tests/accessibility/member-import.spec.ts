@@ -1,5 +1,6 @@
 import { test, expect, type Page } from '@playwright/test'
 import AxeBuilder from '@axe-core/playwright'
+import fs from 'fs'
 
 const base = 'http://localhost:5173'
 
@@ -8,12 +9,23 @@ test.describe('MemberImport accessibility', () => {
     // ensure app thinks initial setup was completed so /import is directly reachable
     await page.addInitScript(() => { localStorage.setItem('setupCompleted', 'true') })
     await page.goto(`${base}/import`)
+    // wait for the app to be hydrated and for the import input to appear
+    await page.waitForLoadState('networkidle')
   })
 
   test('upload and preview modal accessibility', async ({ page }: { page: Page }) => {
     // upload a small JSON file
     const filePath = JSON.stringify([{ name: 'Max Mustermann', number: '123' }])
-    await page.setInputFiles('#import-file', { name: 'members.json', mimeType: 'application/json', buffer: Buffer.from(filePath) })
+    await page.waitForSelector('#import-file', { timeout: 10000 })
+    try {
+      await page.setInputFiles('#import-file', { name: 'members.json', mimeType: 'application/json', buffer: Buffer.from(filePath) })
+    } catch (err) {
+      // diagnostic: save screenshot and HTML to playwright-report for later triage
+      try { await fs.promises.mkdir('playwright-report', { recursive: true }) } catch (e) {}
+      await page.screenshot({ path: 'playwright-report/member-import-failure.png', fullPage: true }).catch(()=>{})
+      await fs.promises.writeFile('playwright-report/member-import-failure.html', await page.content()).catch(()=>{})
+      throw err
+    }
 
     // press import
     await page.click('button:has-text("Start import")')
