@@ -1,0 +1,41 @@
+{
+  "setup": {
+    "title": "Einrichtung",
+    "step": "Schritt",
+    "language": "Sprache",
+    "language_help": "Wählen Sie die Benutzeroberfläche-Sprache.",
+    "admin_title": "Administrator-Konto",
+    "admin_email": "Admin E-Mail",
+    "admin_email_help": "E-Mail zum Einloggen als Administrator.",
+    "admin_password": "Passwort",
+    "admin_password_help": "Wählen Sie ein sicheres Passwort.",
+    "admin_display_name": "Anzeigename",
+    "backup_title": "Backups",
+    "backup_description": "Es wird empfohlen, vor dem Import ein Backup zu erstellen.",
+    "backup_before_import": "Backup vor dem Import erstellen",
+    "backup_help": "Backups werden serverseitig gespeichert und rotiert.",
+    "import_test_title": "Import-Vorschau",
+    "import_test_description": "Testen Sie einen kleinen Beispiel-Import, um zu sehen, wie Daten geparst werden.",
+    "import_sample_file": "Beispieldatei",
+    "preview": "Vorschau",
+    "finish": "Fertig"
+  },
+  "actions": { "back": "Zurück", "next": "Weiter", "finish": "Fertig" },
+  "import": {
+    "title": "Mitglieder importieren",
+    "description": "Laden Sie eine JSON-Exportdatei hoch, um Mitglieder zu importieren.",
+    "choose_file": "JSON-Datei auswählen",
+    "backup_before": "Backup vor dem Import",
+    "start_import": "Import starten",
+    "loading": "Import läuft",
+    "preview": "Server-Vorschau",
+    "confirm_title": "Import bestätigen",
+    "confirm_description": "Bitte überprüfen Sie die Vorschau und bestätigen Sie, um den Import zu schreiben.",
+    "cancelled": "Import abgebrochen",
+    "new_count": "Neue Mitglieder: {count}",
+    "updated_count": "Aktualisierte Mitglieder: {count}",
+    "members_list": "Mitglieder",
+    "success": "Import erfolgreich",
+    "error": "Import fehlgeschlagen"
+  }
+}

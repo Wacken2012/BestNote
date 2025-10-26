@@ -1,0 +1,41 @@
+{
+  "setup": {
+    "title": "Setup",
+    "step": "Step",
+    "language": "Language",
+    "language_help": "Choose the UI language.",
+    "admin_title": "Administrator account",
+    "admin_email": "Admin email",
+    "admin_email_help": "Email used to login as administrator.",
+    "admin_password": "Password",
+    "admin_password_help": "Choose a strong password.",
+    "admin_display_name": "Display name",
+    "backup_title": "Backups",
+    "backup_description": "We recommend making a backup before importing data.",
+    "backup_before_import": "Create backup before import",
+    "backup_help": "Backups are stored on the server and rotated.",
+    "import_test_title": "Import preview",
+    "import_test_description": "Try a small sample import to see how data will be parsed.",
+    "import_sample_file": "Sample file",
+    "preview": "Preview",
+    "finish": "Finish"
+  },
+  "actions": { "back": "Back", "next": "Next", "finish": "Finish" },
+  "import": {
+    "title": "Import members",
+    "description": "Upload a JSON export to import members.",
+    "choose_file": "Choose JSON file",
+    "backup_before": "Backup before import",
+    "start_import": "Start import",
+    "loading": "Import in progress",
+    "preview": "Server preview",
+    "confirm_title": "Confirm import",
+    "confirm_description": "Please review the preview and confirm to commit the import.",
+    "cancelled": "Import cancelled",
+    "new_count": "New members: {count}",
+    "updated_count": "Updated members: {count}",
+    "members_list": "Members",
+    "success": "Import successful",
+    "error": "Import failed"
+  }
+}
