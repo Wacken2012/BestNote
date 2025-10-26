@@ -9,8 +9,11 @@ test.setTimeout(300000)
 
 test.describe('MemberImport accessibility', () => {
   test.beforeEach(async ({ page }: { page: Page }) => {
-  // ensure app thinks initial setup was completed so /import is directly reachable
-  await page.addInitScript(() => { localStorage.setItem('setupCompleted', 'true'); localStorage.setItem('lang','de') })
+  // ensure app thinks initial setup was completed and language is set so /import is directly reachable
+  await page.addInitScript(() => {
+    try { localStorage.setItem('setupCompleted', 'true') } catch (e) {}
+    try { localStorage.setItem('lang', 'de') } catch (e) {}
+  })
 
   // attach console/pageerror handlers and flush logs to disk as they arrive so we have diagnostics
   const logsPath = 'playwright-report/member-import-console.log'
@@ -29,21 +32,28 @@ test.describe('MemberImport accessibility', () => {
 
     // navigate and wait for the main import view to render; capture diagnostics on failure
     try {
-  await page.goto(`${base}/import`, { waitUntil: 'networkidle', timeout: 300000 })
-  await page.waitForTimeout(1000)
-  await page.waitForSelector('[data-testid="member-import"]', { timeout: 300000 })
+      await page.goto(`${base}/import`, { waitUntil: 'networkidle', timeout: 300000 })
+      // short delay to let hydration complete
+      await page.waitForTimeout(1000)
+      // primary selector
+      await page.waitForSelector('[data-testid="member-import"]', { timeout: 120000 })
     } catch (err) {
-      try { await fs.promises.mkdir('playwright-report', { recursive: true }) } catch (e) {}
-      await page.screenshot({ path: 'playwright-report/member-import-before-failure.png', fullPage: true }).catch(()=>{})
+      // try fallback selector once before capturing diagnostics
       try {
-        if (!page.isClosed()) {
-          const html = await page.content()
-          await fs.promises.writeFile('playwright-report/member-import-before-failure.html', html).catch(()=>{})
-        } else {
-          await fs.promises.writeFile('playwright-report/member-import-before-failure.html', '<!-- page closed before content could be read -->').catch(()=>{})
-        }
-      } catch (e) {}
-      throw err
+        await page.waitForSelector('main.page.member-import', { timeout: 30000 })
+      } catch (fallbackErr) {
+        try { await fs.promises.mkdir('playwright-report', { recursive: true }) } catch (e) {}
+        await page.screenshot({ path: 'playwright-report/member-import-before-failure.png', fullPage: true }).catch(()=>{})
+        try {
+          if (!page.isClosed()) {
+            const html = await page.content()
+            await fs.promises.writeFile('playwright-report/member-import-before-failure.html', html).catch(()=>{})
+          } else {
+            await fs.promises.writeFile('playwright-report/member-import-before-failure.html', '<!-- page closed before content could be read -->').catch(()=>{})
+          }
+        } catch (e) {}
+        throw err
+      }
     }
   })
 

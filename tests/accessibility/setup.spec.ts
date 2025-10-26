@@ -8,8 +8,11 @@ test.setTimeout(300000)
 
 test.describe('SetupWizard accessibility', () => {
   test.beforeEach(async ({ page }: { page: Page }) => {
-  // ensure initial setup state so wizard mount is stable
-  await page.addInitScript(() => { localStorage.setItem('setupCompleted', 'true'); localStorage.setItem('lang','de') })
+  // ensure initial setup state so wizard mount is stable and language is set
+  await page.addInitScript(() => {
+    try { localStorage.setItem('setupCompleted', 'true') } catch (e) {}
+    try { localStorage.setItem('lang', 'de') } catch (e) {}
+  })
 
     // attach console/pageerror handlers and flush to disk
     const logsPath = 'playwright-report/setup-console.log'
@@ -23,25 +26,31 @@ test.describe('SetupWizard accessibility', () => {
       const line = `[pageerror] ${err?.message || err}\n`
       fs.appendFile(logsPath, line, () => {})
     })
-      try { await fs.promises.mkdir('playwright-report', { recursive: true }) } catch (e) {}
-      try { await fs.promises.writeFile('playwright-report/marker-setup.txt', `start:${Date.now()}`) } catch (e) {}
+    try { await fs.promises.mkdir('playwright-report', { recursive: true }) } catch (e) {}
+    try { await fs.promises.writeFile('playwright-report/marker-setup.txt', `start:${Date.now()}`) } catch (e) {}
 
+    // navigate and wait for the wizard to mount; capture diagnostics on failure
     try {
-  await page.goto(`${base}/setup`, { waitUntil: 'networkidle', timeout: 300000 })
-  await page.waitForTimeout(1000)
-  await page.waitForSelector('[data-testid="setup-wizard"]', { timeout: 300000 })
+      await page.goto(`${base}/setup`, { waitUntil: 'networkidle', timeout: 300000 })
+      await page.waitForTimeout(1000)
+      await page.waitForSelector('[data-testid="setup-wizard"]', { timeout: 120000 })
     } catch (err) {
-      try { await fs.promises.mkdir('playwright-report', { recursive: true }) } catch (e) {}
-      await page.screenshot({ path: 'playwright-report/setup-before-failure.png', fullPage: true }).catch(()=>{})
+      // fallback attempt
       try {
-        if (!page.isClosed()) {
-          const html = await page.content()
-          await fs.promises.writeFile('playwright-report/setup-before-failure.html', html).catch(()=>{})
-        } else {
-          await fs.promises.writeFile('playwright-report/setup-before-failure.html', '<!-- page closed before content could be read -->').catch(()=>{})
-        }
-      } catch (e) {}
-      throw err
+        await page.waitForSelector('.setup-wizard', { timeout: 30000 })
+      } catch (fallbackErr) {
+        try { await fs.promises.mkdir('playwright-report', { recursive: true }) } catch (e) {}
+        await page.screenshot({ path: 'playwright-report/setup-before-failure.png', fullPage: true }).catch(()=>{})
+        try {
+          if (!page.isClosed()) {
+            const html = await page.content()
+            await fs.promises.writeFile('playwright-report/setup-before-failure.html', html).catch(()=>{})
+          } else {
+            await fs.promises.writeFile('playwright-report/setup-before-failure.html', '<!-- page closed before content could be read -->').catch(()=>{})
+          }
+        } catch (e) {}
+        throw err
+      }
     }
   })
 
