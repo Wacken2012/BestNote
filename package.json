@@ -45,5 +45,6 @@
     ,"@playwright/test": "1.35.0"
     ,"axe-core": "4.7.2"
     ,"@axe-core/playwright": "4.7.2"
+    ,"serve": "14.1.2"
   }
 }

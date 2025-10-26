@@ -26,11 +26,11 @@ jobs:
       - name: Build site
         run: npm run build
 
-      - name: Serve built site
-        run: npx http-server ./dist -p 5173 &
+      - name: Serve built site (SPA fallback)
+        run: npx serve -s dist -l 5173 &
 
       - name: Run accessibility tests (Playwright + axe)
-        run: npx playwright test --project=chromium
+        run: npm run test:accessibility
 
       - name: Upload Playwright report
         if: always()
