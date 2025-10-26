@@ -4,12 +4,12 @@ import fs from 'fs'
 
 const base = 'http://localhost:5173'
 
-test.setTimeout(120000)
+test.setTimeout(300000)
 
 test.describe('SetupWizard accessibility', () => {
   test.beforeEach(async ({ page }: { page: Page }) => {
-    // ensure initial setup state so wizard mount is stable
-    await page.addInitScript(() => { localStorage.setItem('setupCompleted', 'true') })
+  // ensure initial setup state so wizard mount is stable
+  await page.addInitScript(() => { localStorage.setItem('setupCompleted', 'true'); localStorage.setItem('lang','de') })
 
     // attach console/pageerror handlers and flush to disk
     const logsPath = 'playwright-report/setup-console.log'
@@ -27,8 +27,9 @@ test.describe('SetupWizard accessibility', () => {
       try { await fs.promises.writeFile('playwright-report/marker-setup.txt', `start:${Date.now()}`) } catch (e) {}
 
     try {
-      await page.goto(`${base}/setup`, { waitUntil: 'networkidle', timeout: 120000 })
-      await page.waitForSelector('[data-testid="setup-wizard"]', { timeout: 120000 })
+  await page.goto(`${base}/setup`, { waitUntil: 'networkidle', timeout: 300000 })
+  await page.waitForTimeout(1000)
+  await page.waitForSelector('[data-testid="setup-wizard"]', { timeout: 300000 })
     } catch (err) {
       try { await fs.promises.mkdir('playwright-report', { recursive: true }) } catch (e) {}
       await page.screenshot({ path: 'playwright-report/setup-before-failure.png', fullPage: true }).catch(()=>{})

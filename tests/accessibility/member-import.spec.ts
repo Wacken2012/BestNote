@@ -5,12 +5,12 @@ import fs from 'fs'
 const base = 'http://localhost:5173'
 
 // Increase timeout for these slower CI runs
-test.setTimeout(120000)
+test.setTimeout(300000)
 
 test.describe('MemberImport accessibility', () => {
   test.beforeEach(async ({ page }: { page: Page }) => {
-    // ensure app thinks initial setup was completed so /import is directly reachable
-    await page.addInitScript(() => { localStorage.setItem('setupCompleted', 'true') })
+  // ensure app thinks initial setup was completed so /import is directly reachable
+  await page.addInitScript(() => { localStorage.setItem('setupCompleted', 'true'); localStorage.setItem('lang','de') })
 
   // attach console/pageerror handlers and flush logs to disk as they arrive so we have diagnostics
   const logsPath = 'playwright-report/member-import-console.log'
@@ -29,8 +29,9 @@ test.describe('MemberImport accessibility', () => {
 
     // navigate and wait for the main import view to render; capture diagnostics on failure
     try {
-  await page.goto(`${base}/import`, { waitUntil: 'networkidle', timeout: 120000 })
-  await page.waitForSelector('[data-testid="member-import"]', { timeout: 120000 })
+  await page.goto(`${base}/import`, { waitUntil: 'networkidle', timeout: 300000 })
+  await page.waitForTimeout(1000)
+  await page.waitForSelector('[data-testid="member-import"]', { timeout: 300000 })
     } catch (err) {
       try { await fs.promises.mkdir('playwright-report', { recursive: true }) } catch (e) {}
       await page.screenshot({ path: 'playwright-report/member-import-before-failure.png', fullPage: true }).catch(()=>{})

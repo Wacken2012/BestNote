@@ -45,6 +45,16 @@ jobs:
       - name: Run accessibility tests (Playwright + axe)
         run: npm run test:accessibility
 
+      - name: Ensure playwright-report and list contents (debug)
+        if: always()
+        run: |
+          set -e
+          echo "Ensuring playwright-report exists and listing contents"
+          mkdir -p playwright-report
+          # if empty, write a placeholder so upload action finds at least one file
+          if [ -z "$(ls -A playwright-report)" ]; then echo "placeholder" > playwright-report/placeholder.txt; fi
+          ls -la playwright-report || true
+
       - name: Upload Playwright report
         if: always()
         uses: actions/upload-artifact@v4

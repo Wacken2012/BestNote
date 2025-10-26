@@ -1,5 +1,5 @@
 <template>
-  <div class="setup-wizard" role="dialog" aria-modal="true" aria-labelledby="setup-title" data-testid="setup-wizard">
+  <div data-testid="setup-wizard" class="setup-wizard" role="dialog" aria-modal="true" aria-labelledby="setup-title">
     <h2 id="setup-title">{{ $t('setup.title') }}</h2>
     <div class="progress" aria-hidden="true">
       <progress :value="currentStep" :max="steps.length"></progress>
