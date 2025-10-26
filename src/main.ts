@@ -50,6 +50,13 @@ try { (window as any).APP_READY_FOR_TESTS = false } catch (e) { /* noop in non-b
 			;(window as any).APP_HYDRATED = true
 			// explicit log so CI artifacts contain a clear hydration marker
 			try { console.info('app hydrated') } catch (e) {}
+			// fallback: if component-level readiness wasn't set yet, mark app ready for tests
+			try {
+				if (!(window as any).APP_READY_FOR_TESTS) {
+					(window as any).APP_READY_FOR_TESTS = true
+					try { console.info('APP_READY_FOR_TESTS set (fallback from APP_HYDRATED)') } catch (e) {}
+				}
+			} catch (e) {}
 		} catch (e) { /* noop in non-browser env */ }
 	} catch (e) {
 		// swallow any errors here - hydration signal is best-effort
