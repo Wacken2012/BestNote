@@ -40,14 +40,22 @@ test.describe('SetupWizard accessibility', () => {
         await page.waitForSelector('.setup-wizard', { timeout: 30000 })
       } catch (fallbackErr) {
         try { await fs.promises.mkdir('playwright-report', { recursive: true }) } catch (e) {}
-        await page.screenshot({ path: 'playwright-report/setup-before-failure.png', fullPage: true }).catch(()=>{})
+        const pngPath = 'playwright-report/setup-before-failure.png'
+        await page.screenshot({ path: pngPath, fullPage: true }).catch(()=>{})
         try {
-          if (!page.isClosed()) {
-            const html = await page.content()
-            await fs.promises.writeFile('playwright-report/setup-before-failure.html', html).catch(()=>{})
-          } else {
-            await fs.promises.writeFile('playwright-report/setup-before-failure.html', '<!-- page closed before content could be read -->').catch(()=>{})
-          }
+          let html = '<!-- content read failed -->'
+          if (!page.isClosed()) html = await page.content().catch(() => html)
+          await fs.promises.writeFile('playwright-report/setup-before-failure.html', html).catch(()=>{})
+          // attach to Playwright report so HTML reporter and archived report include diagnostics
+          try {
+            const info = test.info()
+            await info.attach('setup-before-failure.html', { body: Buffer.from(html), contentType: 'text/html' })
+            // attach screenshot binary if present
+            try {
+              const buf = await fs.promises.readFile(pngPath).catch(() => null)
+              if (buf) await info.attach('setup-before-failure.png', { body: buf, contentType: 'image/png' })
+            } catch(e) {}
+          } catch(e) {}
         } catch (e) {}
         throw err
       }

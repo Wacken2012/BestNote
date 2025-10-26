@@ -2,7 +2,15 @@
   <div data-testid="setup-wizard" class="setup-wizard" role="dialog" aria-modal="true" aria-labelledby="setup-title">
     <h2 id="setup-title">{{ $t('setup.title') }}</h2>
     <div class="progress" aria-hidden="true">
-      <progress :value="currentStep" :max="steps.length"></progress>
+      <!-- expose progressbar semantics for assistive tech -->
+      <progress
+        :value="currentStep"
+        :max="steps.length"
+        role="progressbar"
+        :aria-valuenow="currentStep"
+        aria-valuemin="1"
+        :aria-valuemax="steps.length"
+      ></progress>
       <span class="sr-only">{{ $t('setup.step') }} {{ currentStep }} / {{ steps.length }}</span>
     </div>
 
@@ -11,7 +19,8 @@
 
       <div class="actions">
         <button type="button" class="btn" @click="prevStep" :disabled="currentStep===1">{{ $t('actions.back') }}</button>
-        <button type="submit" class="btn primary" :aria-disabled="submitting">{{ currentStep===steps.length ? $t('actions.finish') : $t('actions.next') }}</button>
+  <!-- use real disabled attribute so keyboard users cannot tab to a submitting button -->
+  <button type="submit" class="btn primary" :disabled="submitting">{{ currentStep===steps.length ? $t('actions.finish') : $t('actions.next') }}</button>
       </div>
     </form>
   </div>

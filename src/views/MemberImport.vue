@@ -4,8 +4,8 @@
     <p class="muted">{{ t('import.description') }}</p>
 
     <section aria-labelledby="import-controls">
-      <label id="import-controls" for="import-file">{{ t('import.choose_file') }}</label>
-      <input id="import-file" type="file" accept="application/json" @change="onFile" aria-label="Import JSON file" />
+  <label id="import-controls" for="import-file">{{ t('import.choose_file') }}</label>
+  <input id="import-file" type="file" accept="application/json" @change="onFile" aria-label="Import JSON file" aria-describedby="import-controls" />
 
       <label class="checkbox">
         <input type="checkbox" v-model="createBackup" />

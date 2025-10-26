@@ -12,6 +12,7 @@ test('debug: capture HTML and screenshots for /setup and /import', async ({ page
     await page.screenshot({ path: 'playwright-report/debug-setup.png', fullPage: true }).catch(()=>{})
     const html = await page.content().catch(() => '<!-- content read failed -->')
     await fs.promises.writeFile('playwright-report/debug-setup.html', html).catch(()=>{})
+    try { const info = test.info(); await info.attach('debug-setup.html', { body: Buffer.from(html), contentType: 'text/html' }) } catch(e) {}
   } catch (e) {
     await fs.promises.writeFile('playwright-report/debug-setup.error.txt', String(e)).catch(()=>{})
   }
@@ -22,6 +23,7 @@ test('debug: capture HTML and screenshots for /setup and /import', async ({ page
     await page.screenshot({ path: 'playwright-report/debug-import.png', fullPage: true }).catch(()=>{})
     const html2 = await page.content().catch(() => '<!-- content read failed -->')
     await fs.promises.writeFile('playwright-report/debug-import.html', html2).catch(()=>{})
+    try { const info = test.info(); await info.attach('debug-import.html', { body: Buffer.from(html2), contentType: 'text/html' }) } catch(e) {}
   } catch (e) {
     await fs.promises.writeFile('playwright-report/debug-import.error.txt', String(e)).catch(()=>{})
   }
