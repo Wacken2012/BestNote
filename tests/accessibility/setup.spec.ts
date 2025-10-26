@@ -1,14 +1,16 @@
-import { test, expect } from '@playwright/test'
+import { test, expect, type Page } from '@playwright/test'
 import AxeBuilder from '@axe-core/playwright'
 
 const base = 'http://localhost:5173'
 
 test.describe('SetupWizard accessibility', () => {
-  test.beforeEach(async ({ page }) => {
+  test.beforeEach(async ({ page }: { page: Page }) => {
+    // ensure initial setup state so wizard mount is stable
+    await page.addInitScript(() => { localStorage.setItem('setupCompleted', 'true') })
     await page.goto(`${base}/setup`)
   })
 
-  test('keyboard navigation and aria-live', async ({ page }) => {
+  test('keyboard navigation and aria-live', async ({ page }: { page: Page }) => {
     // tab through inputs
     await page.keyboard.press('Tab')
     await page.keyboard.press('Tab')
