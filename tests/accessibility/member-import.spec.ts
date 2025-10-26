@@ -110,6 +110,11 @@ test.describe('MemberImport accessibility', () => {
       const info = test.info()
       await info.attach('axe-results-member-import.json', { body: JSON.stringify(accessibilityScanResults), contentType: 'application/json' })
     } catch (e) {}
+    // persist axe results to disk so the CI artifact contains them even on test failure
+    try {
+      await fs.promises.mkdir('playwright-report', { recursive: true })
+      await fs.promises.writeFile('playwright-report/axe-results-member-import.json', JSON.stringify(accessibilityScanResults, null, 2)).catch(() => {})
+    } catch (e) {}
     expect(accessibilityScanResults.violations.length).toBe(0)
 
     // flush any remaining logs

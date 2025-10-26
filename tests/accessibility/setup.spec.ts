@@ -41,6 +41,12 @@ test.describe('SetupWizard accessibility', () => {
       await page.goto(`${base}/setup`, { waitUntil: 'networkidle', timeout: 300000 })
       // short delay to allow hydration
       await page.waitForTimeout(1000)
+      // persist a debug snapshot of the HTML so the CI artifact always contains page HTML
+      try {
+        await fs.promises.mkdir('playwright-report', { recursive: true })
+        const debugHtml = await page.content().catch(() => '<!-- content read failed -->')
+        await fs.promises.writeFile('playwright-report/debug-setup.html', debugHtml).catch(() => {})
+      } catch (e) {}
       // try primary selector first, then fallback
       try {
         await page.waitForSelector('[data-testid="setup-wizard"]', { timeout: 120000 })
@@ -107,7 +113,12 @@ test.describe('SetupWizard accessibility', () => {
 
     // axe check
   const accessibilityScanResults = await new AxeBuilder({ page: page as any }).analyze()
-    // attach axe results to Playwright report for later triage
+    // persist axe results as a JSON file in playwright-report so CI artifacts always include them
+    try {
+      await fs.promises.mkdir('playwright-report', { recursive: true })
+      await fs.promises.writeFile('playwright-report/axe-results-setup.json', JSON.stringify(accessibilityScanResults, null, 2)).catch(() => {})
+    } catch (e) {}
+    // attach axe results to Playwright report for later triage (reporter attachment)
     try {
       const info = test.info()
       await info.attach('axe-results-setup.json', { body: JSON.stringify(accessibilityScanResults), contentType: 'application/json' })
