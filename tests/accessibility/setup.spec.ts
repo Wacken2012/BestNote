@@ -21,10 +21,17 @@ test.describe('SetupWizard accessibility', () => {
     page.on('console', msg => {
       const line = `[console:${msg.type()}] ${msg.text()}\n`
       fs.appendFile(logsPath, line, () => {})
+      // write console error messages to a separate file for quick triage
+      try {
+        if (msg.type() === 'error') {
+          fs.appendFile('playwright-report/setup-console-errors.log', `[console:error] ${msg.text()}\n`, () => {})
+        }
+      } catch (e) {}
     })
     page.on('pageerror', err => {
       const line = `[pageerror] ${err?.message || err}\n`
       fs.appendFile(logsPath, line, () => {})
+      try { fs.appendFile('playwright-report/setup-console-errors.log', `[pageerror] ${err?.message || err}\n`, () => {}) } catch (e) {}
     })
     try { await fs.promises.mkdir('playwright-report', { recursive: true }) } catch (e) {}
     try { await fs.promises.writeFile('playwright-report/marker-setup.txt', `start:${Date.now()}`) } catch (e) {}
@@ -32,8 +39,15 @@ test.describe('SetupWizard accessibility', () => {
     // navigate and wait for the wizard to mount; capture diagnostics on failure
     try {
       await page.goto(`${base}/setup`, { waitUntil: 'networkidle', timeout: 300000 })
+      // short delay to allow hydration
       await page.waitForTimeout(1000)
-      await page.waitForSelector('[data-testid="setup-wizard"]', { timeout: 120000 })
+      // try primary selector first, then fallback
+      try {
+        await page.waitForSelector('[data-testid="setup-wizard"]', { timeout: 120000 })
+      } catch (e) {
+        await page.waitForTimeout(1000)
+        await page.waitForSelector('.setup-wizard', { timeout: 30000 })
+      }
     } catch (err) {
       // fallback attempt
       try {
@@ -93,6 +107,11 @@ test.describe('SetupWizard accessibility', () => {
 
     // axe check
   const accessibilityScanResults = await new AxeBuilder({ page: page as any }).analyze()
+    // attach axe results to Playwright report for later triage
+    try {
+      const info = test.info()
+      await info.attach('axe-results-setup.json', { body: JSON.stringify(accessibilityScanResults), contentType: 'application/json' })
+    } catch (e) {}
     expect(accessibilityScanResults.violations.length).toBe(0)
   })
 })

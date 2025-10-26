@@ -24,10 +24,14 @@ test.describe('MemberImport accessibility', () => {
     page.on('console', msg => {
       const line = `[console:${msg.type()}] ${msg.text()}\n`
       fs.appendFile(logsPath, line, () => {})
+      try {
+        if (msg.type() === 'error') fs.appendFile('playwright-report/member-import-console-errors.log', `[console:error] ${msg.text()}\n`, () => {})
+      } catch (e) {}
     })
     page.on('pageerror', err => {
       const line = `[pageerror] ${err?.message || err}\n`
       fs.appendFile(logsPath, line, () => {})
+      try { fs.appendFile('playwright-report/member-import-console-errors.log', `[pageerror] ${err?.message || err}\n`, () => {}) } catch (e) {}
     })
 
     // navigate and wait for the main import view to render; capture diagnostics on failure
@@ -35,8 +39,13 @@ test.describe('MemberImport accessibility', () => {
       await page.goto(`${base}/import`, { waitUntil: 'networkidle', timeout: 300000 })
       // short delay to let hydration complete
       await page.waitForTimeout(1000)
-      // primary selector
-      await page.waitForSelector('[data-testid="member-import"]', { timeout: 120000 })
+      // primary selector then fallback
+      try {
+        await page.waitForSelector('[data-testid="member-import"]', { timeout: 120000 })
+      } catch (e) {
+        await page.waitForTimeout(1000)
+        await page.waitForSelector('main.page.member-import', { timeout: 30000 })
+      }
     } catch (err) {
       // try fallback selector once before capturing diagnostics
       try {
@@ -97,6 +106,10 @@ test.describe('MemberImport accessibility', () => {
 
     // axe check
   const accessibilityScanResults = await new AxeBuilder({ page: page as any }).analyze()
+    try {
+      const info = test.info()
+      await info.attach('axe-results-member-import.json', { body: JSON.stringify(accessibilityScanResults), contentType: 'application/json' })
+    } catch (e) {}
     expect(accessibilityScanResults.violations.length).toBe(0)
 
     // flush any remaining logs
