@@ -23,6 +23,8 @@ test.describe('SetupWizard accessibility', () => {
       const line = `[pageerror] ${err?.message || err}\n`
       fs.appendFile(logsPath, line, () => {})
     })
+      try { await fs.promises.mkdir('playwright-report', { recursive: true }) } catch (e) {}
+      try { await fs.promises.writeFile('playwright-report/marker-setup.txt', `start:${Date.now()}`) } catch (e) {}
 
     try {
       await page.goto(`${base}/setup`, { waitUntil: 'networkidle', timeout: 60000 })

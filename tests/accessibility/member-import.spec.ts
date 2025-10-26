@@ -12,10 +12,12 @@ test.describe('MemberImport accessibility', () => {
     // ensure app thinks initial setup was completed so /import is directly reachable
     await page.addInitScript(() => { localStorage.setItem('setupCompleted', 'true') })
 
-    // attach console/pageerror handlers and flush logs to disk as they arrive so we have diagnostics
-    const logsPath = 'playwright-report/member-import-console.log'
-    try { await fs.promises.mkdir('playwright-report', { recursive: true }) } catch (e) {}
-    await fs.promises.writeFile(logsPath, `=== Playwright logs for member-import (start) ===\n`).catch(()=>{})
+  // attach console/pageerror handlers and flush logs to disk as they arrive so we have diagnostics
+  const logsPath = 'playwright-report/member-import-console.log'
+  try { await fs.promises.mkdir('playwright-report', { recursive: true }) } catch (e) {}
+  // create an early marker file so CI artifact upload finds at least one file
+  try { await fs.promises.writeFile('playwright-report/marker-member-import.txt', `start:${Date.now()}`) } catch (e) {}
+  await fs.promises.writeFile(logsPath, `=== Playwright logs for member-import (start) ===\n`).catch(()=>{})
     page.on('console', msg => {
       const line = `[console:${msg.type()}] ${msg.text()}\n`
       fs.appendFile(logsPath, line, () => {})
