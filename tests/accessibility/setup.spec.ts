@@ -9,12 +9,17 @@ test.describe('SetupWizard accessibility', () => {
     // ensure initial setup state so wizard mount is stable
     await page.addInitScript(() => { localStorage.setItem('setupCompleted', 'true') })
   await page.goto(`${base}/setup`)
+  // capture console and page errors into a file for diagnostics
+  const logs: string[] = []
+  page.on('console', msg => logs.push(`[console:${msg.type()}] ${msg.text()}`))
+  page.on('pageerror', err => logs.push(`[pageerror] ${err?.message || err}`))
   try {
     await page.waitForSelector('.setup-wizard', { timeout: 60000 })
   } catch (err) {
     try { await fs.promises.mkdir('playwright-report', { recursive: true }) } catch (e) {}
     await page.screenshot({ path: 'playwright-report/setup-before-failure.png', fullPage: true }).catch(()=>{})
     await fs.promises.writeFile('playwright-report/setup-before-failure.html', await page.content()).catch(()=>{})
+    await fs.promises.writeFile('playwright-report/setup-console.log', logs.join('\n')).catch(()=>{})
     throw err
   }
   })

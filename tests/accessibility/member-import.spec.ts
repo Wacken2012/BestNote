@@ -15,10 +15,14 @@ test.describe('MemberImport accessibility', () => {
     } catch (err) {
       try { await fs.promises.mkdir('playwright-report', { recursive: true }) } catch (e) {}
       await page.screenshot({ path: 'playwright-report/member-import-before-failure.png', fullPage: true }).catch(()=>{})
-      await fs.promises.writeFile('playwright-report/member-import-before-failure.html', await page.content()).catch(()=>{})
+        try { const html = await page.content(); await fs.promises.writeFile('playwright-report/member-import-before-failure.html', html).catch(()=>{}) } catch(e) {}
       throw err
     }
   })
+    // capture console and page errors into a file for diagnostics
+    const logs: string[] = []
+    page.on('console', msg => logs.push(`[console:${msg.type()}] ${msg.text()}`))
+    page.on('pageerror', err => logs.push(`[pageerror] ${err?.message || err}`))
 
   test('upload and preview modal accessibility', async ({ page }: { page: Page }) => {
     // upload a small JSON file

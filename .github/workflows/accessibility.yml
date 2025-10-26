@@ -29,6 +29,19 @@ jobs:
       - name: Serve built site (SPA fallback)
         run: npx serve -s dist -l 5173 &
 
+      - name: Wait for server to be ready
+        run: |
+          echo "Waiting for http://127.0.0.1:5173 to return 200..."
+          for i in {1..60}; do
+            if curl -sSf http://127.0.0.1:5173 > /dev/null; then
+              echo "server ready"
+              exit 0
+            fi
+            sleep 1
+          done
+          echo "server did not become ready in time"
+          exit 1
+
       - name: Run accessibility tests (Playwright + axe)
         run: npm run test:accessibility
 
