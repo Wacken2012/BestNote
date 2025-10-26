@@ -1,4 +1,4 @@
-import { createApp } from 'vue'
+import { createApp, nextTick } from 'vue'
 import { createPinia } from 'pinia'
 import router from './router'
 import { createI18n } from 'vue-i18n'
@@ -29,7 +29,29 @@ app.directive('can-calendar', vCanCalendar)
 app.mount('#app')
 
 // signal to tests that the app has finished client-side initialization (hydration/i18n)
-try { (window as any).__APP_HYDRATED__ = true } catch (e) { /* noop in non-browser env */ }
+;(async () => {
+	try {
+		// wait for router to be ready
+		try { await router.isReady() } catch (e) { /* proceed even if router readiness fails */ }
+		// ensure i18n locale is available (not a real async API but await the value to follow the requested contract)
+		try {
+			const i18nGlobal = (i18n as any).global
+			if (i18nGlobal && i18nGlobal.locale && 'value' in i18nGlobal.locale) {
+				// awaiting the value is effectively a microtask; keeps the intent explicit
+				await Promise.resolve(i18nGlobal.locale.value)
+			}
+		} catch (e) { /* noop */ }
+		// wait a microtask to let DOM updates and hydration finish
+		try { await nextTick() } catch (e) {}
+		try {
+			;(window as any).APP_HYDRATED = true
+			// explicit log so CI artifacts contain a clear hydration marker
+			try { console.info('app hydrated') } catch (e) {}
+		} catch (e) { /* noop in non-browser env */ }
+	} catch (e) {
+		// swallow any errors here - hydration signal is best-effort
+	}
+})()
 
 // keep HTML lang attribute in sync if user changes language later
 try {

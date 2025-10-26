@@ -41,7 +41,7 @@ test.describe('MemberImport accessibility', () => {
       await page.waitForTimeout(1000)
       // wait for app hydration signal set by the app once i18n and mounting finished
       try {
-        await page.waitForFunction(() => (window as any).__APP_HYDRATED__ === true, { timeout: 60000 })
+        await page.waitForFunction(() => (window as any).APP_HYDRATED === true, { timeout: 60000 })
       } catch (e) {
         // allow fallback — we still persist debug HTML and diagnostics below
       }
