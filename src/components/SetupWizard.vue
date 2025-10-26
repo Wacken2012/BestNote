@@ -40,7 +40,7 @@ import FinishStep from './wizard/FinishStep.vue'
 
 const store = useSetupStore()
 const router = useRouter()
-const { locale } = useI18n()
+const { t, locale } = useI18n()
 
 const steps = [
   { key: 'language', component: LanguageStep },
@@ -85,6 +85,7 @@ onMounted(async () => {
   // Poll the visible heading text for a short period and only then set the readiness flag.
   try {
     await nextTick()
+    const expectedHeading = String(t('setup.title'))
     const maxWait = 2000
     const interval = 100
     let waited = 0
@@ -92,8 +93,8 @@ onMounted(async () => {
     while (waited < maxWait) {
       const el = document.querySelector('[data-testid="setup-wizard"] h2') || document.querySelector('#setup-title')
       headingText = el && el.textContent ? el.textContent.trim() : ''
-      // translated texts in our app don't contain a dot (.) while i18n keys do (e.g. 'setup.title')
-      if (headingText && !headingText.includes('.')) break
+      // prefer exact-match to avoid i18n-key races
+      if (headingText && headingText === expectedHeading) break
       // small delay
       // eslint-disable-next-line no-await-in-loop
       await new Promise(res => setTimeout(res, interval))
@@ -101,11 +102,12 @@ onMounted(async () => {
     }
     try {
       ;(window as any).APP_READY_FOR_TESTS = true
-      try { console.info('APP_READY_FOR_TESTS set (SetupWizard)', { locale: locale.value, heading: headingText }) } catch (e) {}
+      ;(window as any).APP_READY_FOR_TESTS_SETUP = true
+      try { console.info('APP_READY_FOR_TESTS set (SetupWizard)', { locale: locale.value, expected: expectedHeading, actual: headingText, waited }) } catch (e) {}
     } catch (e) {}
   } catch (e) {
-    // best-effort: still set the flag so tests don't hang forever
-    try { (window as any).APP_READY_FOR_TESTS = true } catch (e) {}
+    // best-effort: still set the flags so tests don't hang forever
+    try { (window as any).APP_READY_FOR_TESTS = true; (window as any).APP_READY_FOR_TESTS_SETUP = false } catch (e) {}
   }
 })
 </script>
