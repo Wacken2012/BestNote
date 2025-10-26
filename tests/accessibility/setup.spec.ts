@@ -111,18 +111,24 @@ test.describe('SetupWizard accessibility', () => {
     const docLang = await page.evaluate(() => document.documentElement.lang)
     expect(['en','de']).toContain(docLang)
 
-    // axe check
-  const accessibilityScanResults = await new AxeBuilder({ page: page as any }).analyze()
-    // persist axe results as a JSON file in playwright-report so CI artifacts always include them
+    // axe check (persist early and always write JSON even on error)
+  try {
+    const accessibilityScanResults = await new AxeBuilder({ page: page as any }).analyze()
     try {
       await fs.promises.mkdir('playwright-report', { recursive: true })
       await fs.promises.writeFile('playwright-report/axe-results-setup.json', JSON.stringify(accessibilityScanResults, null, 2)).catch(() => {})
     } catch (e) {}
-    // attach axe results to Playwright report for later triage (reporter attachment)
     try {
       const info = test.info()
       await info.attach('axe-results-setup.json', { body: JSON.stringify(accessibilityScanResults), contentType: 'application/json' })
     } catch (e) {}
     expect(accessibilityScanResults.violations.length).toBe(0)
+    } catch (e) {
+    try {
+      await fs.promises.mkdir('playwright-report', { recursive: true })
+      await fs.promises.writeFile('playwright-report/axe-results-setup.json', JSON.stringify({ error: ((e as any) && (e as any).message) || String(e) }, null, 2)).catch(() => {})
+    } catch (e2) {}
+    throw e
+  }
   })
 })
