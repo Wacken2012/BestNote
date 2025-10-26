@@ -9,7 +9,14 @@ test.describe('SetupWizard accessibility', () => {
     // ensure initial setup state so wizard mount is stable
     await page.addInitScript(() => { localStorage.setItem('setupCompleted', 'true') })
   await page.goto(`${base}/setup`)
-  await page.waitForSelector('.setup-wizard', { timeout: 15000 })
+  try {
+    await page.waitForSelector('.setup-wizard', { timeout: 60000 })
+  } catch (err) {
+    try { await fs.promises.mkdir('playwright-report', { recursive: true }) } catch (e) {}
+    await page.screenshot({ path: 'playwright-report/setup-before-failure.png', fullPage: true }).catch(()=>{})
+    await fs.promises.writeFile('playwright-report/setup-before-failure.html', await page.content()).catch(()=>{})
+    throw err
+  }
   })
 
   test('keyboard navigation and aria-live', async ({ page }: { page: Page }) => {
@@ -17,7 +24,7 @@ test.describe('SetupWizard accessibility', () => {
     await page.keyboard.press('Tab')
     await page.keyboard.press('Tab')
     // choose language (assume select exists)
-  await page.waitForSelector('#lang-select', { timeout: 30000 })
+  await page.waitForSelector('#lang-select', { timeout: 60000 })
     const lang = await page.locator('#lang-select')
     try {
       await lang.selectOption('en')

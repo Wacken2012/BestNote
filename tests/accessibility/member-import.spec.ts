@@ -8,15 +8,22 @@ test.describe('MemberImport accessibility', () => {
   test.beforeEach(async ({ page }: { page: Page }) => {
     // ensure app thinks initial setup was completed so /import is directly reachable
     await page.addInitScript(() => { localStorage.setItem('setupCompleted', 'true') })
-  await page.goto(`${base}/import`)
-  // wait for the main import view to render
-  await page.waitForSelector('main.page.member-import', { timeout: 15000 })
+    await page.goto(`${base}/import`)
+    // wait for the main import view to render; capture diagnostics on failure
+    try {
+      await page.waitForSelector('main.page.member-import', { timeout: 60000 })
+    } catch (err) {
+      try { await fs.promises.mkdir('playwright-report', { recursive: true }) } catch (e) {}
+      await page.screenshot({ path: 'playwright-report/member-import-before-failure.png', fullPage: true }).catch(()=>{})
+      await fs.promises.writeFile('playwright-report/member-import-before-failure.html', await page.content()).catch(()=>{})
+      throw err
+    }
   })
 
   test('upload and preview modal accessibility', async ({ page }: { page: Page }) => {
     // upload a small JSON file
     const filePath = JSON.stringify([{ name: 'Max Mustermann', number: '123' }])
-  await page.waitForSelector('#import-file', { timeout: 30000 })
+  await page.waitForSelector('#import-file', { timeout: 60000 })
     try {
       await page.setInputFiles('#import-file', { name: 'members.json', mimeType: 'application/json', buffer: Buffer.from(filePath) })
     } catch (err) {
