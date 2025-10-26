@@ -4,12 +4,11 @@
     <p class="muted">{{ t('import.description') }}</p>
 
     <section aria-labelledby="import-controls">
-  <label id="import-controls" for="import-file">{{ t('import.choose_file') }}</label>
-  <input id="import-file" type="file" accept="application/json" @change="onFile" aria-label="Import JSON file" aria-describedby="import-controls" />
+      <label id="import-controls" for="import-file">{{ t('import.choose_file') }}</label>
+      <input id="import-file" type="file" accept="application/json" @change="onFile" aria-label="Import JSON file" aria-describedby="import-controls" />
 
       <label class="checkbox">
-        <input type="checkbox" v-model="createBackup" />
-        <span>{{ t('import.backup_before') }}</span>
+        <input type="checkbox" v-model="createBackup" /> {{ t('import.create_backup') }}
       </label>
 
       <div class="actions">
@@ -19,32 +18,50 @@
       <div v-if="loading" role="status" aria-live="polite">{{ t('import.loading') }} <span class="spinner">⏳</span></div>
 
       <div v-if="preview">
-          <h2>{{ t('import.preview') }}</h2>
-          <pre class="preview">{{ preview }}</pre>
-        </div>
+        <h2>{{ t('import.preview') }}</h2>
+        <pre class="preview">{{ preview }}</pre>
+      </div>
 
       <div v-if="result" role="status" aria-live="polite" class="result">{{ result }}</div>
     </section>
-    <ImportPreviewModal v-if="showConfirm" :previewData="previewData" @confirm="onModalConfirm" @cancel="onModalCancel" />
 
+    <ImportPreviewModal v-if="showConfirm" :previewData="previewData" @confirm="onModalConfirm" @cancel="onModalCancel" />
   </main>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
-import { onMounted } from 'vue'
+import { ref, onMounted, nextTick } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useNotify } from '../composables/useNotify'
 import ImportPreviewModal from '../components/ImportPreviewModal.vue'
 
-const { t } = useI18n()
-// small readiness signal for Playwright so tests can wait until this view has mounted
-onMounted(() => {
+const { t, locale } = useI18n()
+
+// small readiness signal for Playwright: set after heading appears translated
+onMounted(async () => {
   try {
-    ;(window as any).APP_READY_FOR_TESTS = true
-    try { console.info('APP_READY_FOR_TESTS set (MemberImport)') } catch (e) {}
-  } catch (e) { /* noop */ }
+    await nextTick()
+    const maxWait = 2000
+    const interval = 100
+    let waited = 0
+    let headingText = ''
+    while (waited < maxWait) {
+      const el = document.querySelector('main[data-testid="member-import"] h1') || document.querySelector('main h1')
+      headingText = el && el.textContent ? el.textContent.trim() : ''
+      if (headingText && !headingText.includes('.')) break
+      // eslint-disable-next-line no-await-in-loop
+      await new Promise(res => setTimeout(res, interval))
+      waited += interval
+    }
+    try {
+      ;(window as any).APP_READY_FOR_TESTS = true
+      try { console.info('APP_READY_FOR_TESTS set (MemberImport)', { locale: locale.value, heading: headingText }) } catch (e) {}
+    } catch (e) {}
+  } catch (e) {
+    try { (window as any).APP_READY_FOR_TESTS = true } catch (e) {}
+  }
 })
+
 const file = ref<File | null>(null)
 const preview = ref('')
 const createBackup = ref(true)
@@ -67,7 +84,6 @@ function doConfirm(v:boolean) {
 const previewData = ref<{ newCount:number; updatedCount:number; memberList?: any[] }>({ newCount:0, updatedCount:0, memberList:[] })
 
 function onModalConfirm() {
-  // user confirmed - emit the internal confirm resolver
   doConfirm(true)
 }
 
@@ -99,8 +115,6 @@ async function startImport() {
       method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ members: payload, backup: createBackup.value })
     })
     const dryJson = await dry.json()
-    // show preview from server and open confirm modal
-    // expected dryJson shape: { newCount, updatedCount, members }
     previewData.value = {
       newCount: dryJson.newCount || 0,
       updatedCount: dryJson.updatedCount || 0,
@@ -108,7 +122,6 @@ async function startImport() {
     }
     preview.value = JSON.stringify(dryJson, null, 2)
     showConfirm.value = true
-    // wait for user confirmation
     const confirmed = await waitForConfirm()
     if (!confirmed) {
       result.value = t('import.cancelled') || 'Cancelled'
@@ -116,7 +129,6 @@ async function startImport() {
       return
     }
 
-    // commit after confirmation
     const commit = await fetch('/api/members/import', {
       method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ members: payload, backup: createBackup.value })
     })
@@ -131,7 +143,6 @@ async function startImport() {
     loading.value = false
   }
 }
-
 </script>
 
 <style scoped>
@@ -141,3 +152,4 @@ async function startImport() {
 .spinner { margin-left:8px }
 .result { margin-top:12px; font-weight:600 }
 </style>
+

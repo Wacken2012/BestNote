@@ -27,7 +27,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, onMounted } from 'vue'
+import { ref, watch, onMounted, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useSetupStore } from '../store/setup'
@@ -77,14 +77,36 @@ async function nextStep() {
   await router.push({ name: 'Dashboard' })
 }
 
-onMounted(() => {
+onMounted(async () => {
   // ensure i18n uses stored language at mount
   if (store.language) locale.value = store.language
-  // signal tests that this important component has mounted and i18n applied
+
+  // Wait for DOM to render and for i18n to apply translations.
+  // Poll the visible heading text for a short period and only then set the readiness flag.
   try {
-    ;(window as any).APP_READY_FOR_TESTS = true
-    try { console.info('APP_READY_FOR_TESTS set (SetupWizard)') } catch (e) {}
-  } catch (e) { /* noop in non-browser env */ }
+    await nextTick()
+    const maxWait = 2000
+    const interval = 100
+    let waited = 0
+    let headingText = ''
+    while (waited < maxWait) {
+      const el = document.querySelector('[data-testid="setup-wizard"] h2') || document.querySelector('#setup-title')
+      headingText = el && el.textContent ? el.textContent.trim() : ''
+      // translated texts in our app don't contain a dot (.) while i18n keys do (e.g. 'setup.title')
+      if (headingText && !headingText.includes('.')) break
+      // small delay
+      // eslint-disable-next-line no-await-in-loop
+      await new Promise(res => setTimeout(res, interval))
+      waited += interval
+    }
+    try {
+      ;(window as any).APP_READY_FOR_TESTS = true
+      try { console.info('APP_READY_FOR_TESTS set (SetupWizard)', { locale: locale.value, heading: headingText }) } catch (e) {}
+    } catch (e) {}
+  } catch (e) {
+    // best-effort: still set the flag so tests don't hang forever
+    try { (window as any).APP_READY_FOR_TESTS = true } catch (e) {}
+  }
 })
 </script>
 
