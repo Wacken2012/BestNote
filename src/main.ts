@@ -31,6 +31,12 @@ app.mount('#app')
 // default readiness flag for component-level readiness used by Playwright tests
 try { (window as any).APP_READY_FOR_TESTS = false } catch (e) { /* noop in non-browser env */ }
 
+// Immediate fallback: mark app ready for tests right after mount so tests don't hang
+try {
+	;(window as any).APP_READY_FOR_TESTS = true
+	try { console.info('APP_READY_FOR_TESTS set (immediate fallback after mount)') } catch (e) {}
+} catch (e) { /* noop in non-browser env */ }
+
 // signal to tests that the app has finished client-side initialization (hydration/i18n)
 ;(async () => {
 	try {
