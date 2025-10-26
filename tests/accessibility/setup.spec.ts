@@ -46,6 +46,8 @@ test.describe('SetupWizard accessibility', () => {
         await fs.promises.mkdir('playwright-report', { recursive: true })
         const debugHtml = await page.content().catch(() => '<!-- content read failed -->')
         await fs.promises.writeFile('playwright-report/debug-setup.html', debugHtml).catch(() => {})
+        // attach debug HTML so it's included in Playwright attachments as well
+        try { const info = test.info(); await info.attach('debug-setup.html', { body: Buffer.from(debugHtml), contentType: 'text/html' }) } catch (e) {}
       } catch (e) {}
       // try primary selector first, then fallback
       try {
@@ -112,23 +114,27 @@ test.describe('SetupWizard accessibility', () => {
     expect(['en','de']).toContain(docLang)
 
     // axe check (persist early and always write JSON even on error)
-  try {
-    const accessibilityScanResults = await new AxeBuilder({ page: page as any }).analyze()
+    await test.step('axe analysis and persistence', async () => {
+      try {
+        const accessibilityScanResults = await new AxeBuilder({ page: page as any }).analyze()
+        try {
+          await fs.promises.mkdir('playwright-report', { recursive: true })
+          await fs.promises.writeFile('playwright-report/axe-results-setup.json', JSON.stringify(accessibilityScanResults, null, 2)).catch(() => {})
+        } catch (e) {}
+        try { const info = test.info(); await info.attach('axe-results-setup.json', { body: Buffer.from(JSON.stringify(accessibilityScanResults)), contentType: 'application/json' }) } catch (e) {}
+        expect(accessibilityScanResults.violations.length).toBe(0)
+      } catch (e) {
+        try { await fs.promises.mkdir('playwright-report', { recursive: true }) } catch (e2) {}
+        try { await fs.promises.writeFile('playwright-report/axe-results-setup.json', JSON.stringify({ error: ((e as any) && (e as any).message) || String(e) }, null, 2)).catch(() => {}) } catch (e3) {}
+        try { const info = test.info(); await info.attach('axe-results-setup.json', { body: Buffer.from(JSON.stringify({ error: ((e as any) && (e as any).message) || String(e) })), contentType: 'application/json' }) } catch (e4) {}
+        throw e
+      }
+    })
+
+    // attach console-errors log if present
     try {
-      await fs.promises.mkdir('playwright-report', { recursive: true })
-      await fs.promises.writeFile('playwright-report/axe-results-setup.json', JSON.stringify(accessibilityScanResults, null, 2)).catch(() => {})
+      const errBuf = await fs.promises.readFile('playwright-report/setup-console-errors.log').catch(() => null)
+      if (errBuf) try { const info = test.info(); await info.attach('setup-console-errors.log', { body: errBuf, contentType: 'text/plain' }) } catch (e) {}
     } catch (e) {}
-    try {
-      const info = test.info()
-      await info.attach('axe-results-setup.json', { body: JSON.stringify(accessibilityScanResults), contentType: 'application/json' })
-    } catch (e) {}
-    expect(accessibilityScanResults.violations.length).toBe(0)
-    } catch (e) {
-    try {
-      await fs.promises.mkdir('playwright-report', { recursive: true })
-      await fs.promises.writeFile('playwright-report/axe-results-setup.json', JSON.stringify({ error: ((e as any) && (e as any).message) || String(e) }, null, 2)).catch(() => {})
-    } catch (e2) {}
-    throw e
-  }
   })
 })

@@ -44,6 +44,7 @@ test.describe('MemberImport accessibility', () => {
         await fs.promises.mkdir('playwright-report', { recursive: true })
         const debugHtml = await page.content().catch(() => '<!-- content read failed -->')
         await fs.promises.writeFile('playwright-report/debug-import.html', debugHtml).catch(() => {})
+        try { const info = test.info(); await info.attach('debug-import.html', { body: Buffer.from(debugHtml), contentType: 'text/html' }) } catch (e) {}
       } catch (e) {}
       // primary selector then fallback
       try {
@@ -111,19 +112,28 @@ test.describe('MemberImport accessibility', () => {
     await page.keyboard.press('Enter')
 
     // axe check with guaranteed persistence
-  try {
-    const accessibilityScanResults = await new AxeBuilder({ page: page as any }).analyze()
+  await test.step('axe analysis and persistence', async () => {
     try {
-      await fs.promises.mkdir('playwright-report', { recursive: true })
-      await fs.promises.writeFile('playwright-report/axe-results-member-import.json', JSON.stringify(accessibilityScanResults, null, 2)).catch(() => {})
-    } catch (e) {}
-    try { const info = test.info(); await info.attach('axe-results-member-import.json', { body: JSON.stringify(accessibilityScanResults), contentType: 'application/json' }) } catch (e) {}
-    expect(accessibilityScanResults.violations.length).toBe(0)
-  } catch (e) {
-    try { await fs.promises.mkdir('playwright-report', { recursive: true }) } catch (e2) {}
-    try { await fs.promises.writeFile('playwright-report/axe-results-member-import.json', JSON.stringify({ error: ((e as any) && (e as any).message) || String(e) }, null, 2)).catch(() => {}) } catch (e3) {}
-    throw e
-  }
+      const accessibilityScanResults = await new AxeBuilder({ page: page as any }).analyze()
+      try {
+        await fs.promises.mkdir('playwright-report', { recursive: true })
+        await fs.promises.writeFile('playwright-report/axe-results-member-import.json', JSON.stringify(accessibilityScanResults, null, 2)).catch(() => {})
+      } catch (e) {}
+      try { const info = test.info(); await info.attach('axe-results-member-import.json', { body: Buffer.from(JSON.stringify(accessibilityScanResults)), contentType: 'application/json' }) } catch (e) {}
+      expect(accessibilityScanResults.violations.length).toBe(0)
+    } catch (e) {
+      try { await fs.promises.mkdir('playwright-report', { recursive: true }) } catch (e2) {}
+      try { await fs.promises.writeFile('playwright-report/axe-results-member-import.json', JSON.stringify({ error: ((e as any) && (e as any).message) || String(e) }, null, 2)).catch(() => {}) } catch (e3) {}
+      try { const info = test.info(); await info.attach('axe-results-member-import.json', { body: Buffer.from(JSON.stringify({ error: ((e as any) && (e as any).message) || String(e) })), contentType: 'application/json' }) } catch (e4) {}
+      throw e
+    }
+  })
+
+  // attach console-errors if present
+  try {
+    const errBuf = await fs.promises.readFile('playwright-report/member-import-console-errors.log').catch(() => null)
+    if (errBuf) try { const info = test.info(); await info.attach('member-import-console-errors.log', { body: errBuf, contentType: 'text/plain' }) } catch (e) {}
+  } catch (e) {}
 
     // flush any remaining logs
     try { await fs.promises.appendFile('playwright-report/member-import-console.log', `=== Playwright logs (end) ===\n`).catch(()=>{}) } catch (e) {}
