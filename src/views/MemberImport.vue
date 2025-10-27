@@ -41,6 +41,7 @@ const { t, locale } = useI18n()
 onMounted(async () => {
   try {
     await nextTick()
+    const expectedHeading = String(t('import.title'))
     const maxWait = 2000
     const interval = 100
     let waited = 0
@@ -48,14 +49,16 @@ onMounted(async () => {
     while (waited < maxWait) {
       const el = document.querySelector('main[data-testid="member-import"] h1') || document.querySelector('main h1')
       headingText = el && el.textContent ? el.textContent.trim() : ''
-      if (headingText && !headingText.includes('.')) break
+      // prefer exact-match against the i18n result to avoid race with key placeholders
+      if (headingText && headingText === expectedHeading) break
       // eslint-disable-next-line no-await-in-loop
       await new Promise(res => setTimeout(res, interval))
       waited += interval
     }
     try {
       ;(window as any).APP_READY_FOR_TESTS = true
-      try { console.info('APP_READY_FOR_TESTS set (MemberImport)', { locale: locale.value, heading: headingText }) } catch (e) {}
+      ;(window as any).APP_READY_FOR_TESTS_MEMBER = true
+      try { console.info('APP_READY_FOR_TESTS_MEMBER set', { locale: locale.value, expected: expectedHeading, actual: headingText, waited }) } catch (e) {}
     } catch (e) {}
   } catch (e) {
     try { (window as any).APP_READY_FOR_TESTS = true } catch (e) {}

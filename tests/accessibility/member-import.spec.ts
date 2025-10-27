@@ -45,6 +45,12 @@ test.describe('MemberImport accessibility', () => {
       } catch (e) {
         // allow fallback — we still persist debug HTML and diagnostics below
       }
+      // prefer component-level readiness: wait for explicit MemberImport readiness flag set by the component
+      try {
+        await page.waitForFunction(() => (window as any).APP_READY_FOR_TESTS_MEMBER === true, { timeout: 60000 })
+      } catch (e) {
+        // fall back to the previous heuristic if the component flag wasn't set
+      }
       // wait for a translated heading text (avoid i18n key like 'members.title')
       try {
         await page.waitForFunction(() => {

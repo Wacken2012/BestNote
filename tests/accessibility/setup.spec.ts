@@ -9,8 +9,9 @@ test.setTimeout(300000)
 test.describe('SetupWizard accessibility', () => {
   test.beforeEach(async ({ page }: { page: Page }) => {
   // ensure initial setup state so wizard mount is stable and language is set
+  // NOTE: do NOT mark setupCompleted=true here — that redirects away from /setup.
   await page.addInitScript(() => {
-    try { localStorage.setItem('setupCompleted', 'true') } catch (e) {}
+    try { localStorage.setItem('setupCompleted', 'false') } catch (e) {}
     try { localStorage.setItem('lang', 'de') } catch (e) {}
   })
 
@@ -46,6 +47,12 @@ test.describe('SetupWizard accessibility', () => {
         await page.waitForFunction(() => (window as any).APP_READY_FOR_TESTS === true, { timeout: 60000 })
       } catch (e) {
         // proceed anyway; the subsequent selectors have their own timeouts and we persist debug HTML
+      }
+      // prefer component-level readiness: wait for explicit SetupWizard readiness flag set by the component
+      try {
+        await page.waitForFunction(() => (window as any).APP_READY_FOR_TESTS_SETUP === true, { timeout: 60000 })
+      } catch (e) {
+        // fall back to the previous heuristic if the component flag wasn't set
       }
       // also wait until a heading text is translated (heuristic: not an i18n key containing a dot)
       try {
