@@ -56,6 +56,12 @@ try {
 			;(window as any).APP_HYDRATED = true
 			// explicit log so CI artifacts contain a clear hydration marker
 			try { console.info('app hydrated') } catch (e) {}
+			// also log the current i18n locale and route for CI diagnostics
+			try {
+				const i18nGlobal = (i18n as any).global
+				const localeVal = i18nGlobal && i18nGlobal.locale && 'value' in i18nGlobal.locale ? i18nGlobal.locale.value : savedLang
+				try { console.info('app init', { locale: localeVal, route: window.location.pathname }) } catch (e) {}
+			} catch (e) {}
 			// fallback: if component-level readiness wasn't set yet, mark app ready for tests
 			try {
 				if (!(window as any).APP_READY_FOR_TESTS) {
@@ -67,6 +73,19 @@ try {
 	} catch (e) {
 		// swallow any errors here - hydration signal is best-effort
 	}
+	
+// router navigation diagnostics: write a small meta tag so Playwright debug HTML contains current route
+try {
+	router.afterEach((to, from) => {
+		try {
+			const meta = document.querySelector('meta[data-playwright-route]') || document.createElement('meta')
+			meta.setAttribute('data-playwright-route', to.fullPath || to.path || String(to))
+			meta.setAttribute('content', `from:${from.fullPath || from.path || String(from)} at:${Date.now()}`)
+			if (!document.head.contains(meta)) document.head.appendChild(meta)
+		} catch (e) {}
+		try { console.info('router: navigated', { to: to.fullPath || to.path || String(to), from: from.fullPath || from.path || String(from) }) } catch (e) {}
+	})
+} catch (e) {}
 })()
 
 // keep HTML lang attribute in sync if user changes language later
