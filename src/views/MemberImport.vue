@@ -59,6 +59,15 @@ onMounted(async () => {
       ;(window as any).APP_READY_FOR_TESTS = true
       ;(window as any).APP_READY_FOR_TESTS_MEMBER = true
       try { console.info('APP_READY_FOR_TESTS_MEMBER set', { locale: locale.value, expected: expectedHeading, actual: headingText, waited }) } catch (e) {}
+      // additional early mount diagnostics and a DOM marker for Playwright debug HTML
+      try {
+        const meta = document.createElement('meta')
+        meta.setAttribute('data-playwright-ready', 'member-import')
+        meta.setAttribute('content', headingText || expectedHeading)
+        document.head.appendChild(meta)
+        const mountHeading = document.querySelector('main[data-testid="member-import"] h1')?.textContent || ''
+        try { console.info('MemberImport mounted', { locale: locale.value, expected: expectedHeading, actual: mountHeading, waited }) } catch (e) {}
+      } catch (e) {}
     } catch (e) {}
   } catch (e) {
     try { (window as any).APP_READY_FOR_TESTS = true } catch (e) {}
