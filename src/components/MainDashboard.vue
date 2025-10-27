@@ -5,7 +5,8 @@
       <label>
         <input type="checkbox" v-model="seniorMode" /> Senior mode
       </label>
-      <select v-model="lang" @change="changeLang">
+      <label for="main-lang-select">{{ $t ? $t('common.language') : 'Language' }}</label>
+      <select id="main-lang-select" v-model="lang" @change="changeLang" aria-label="{{ $t ? $t('common.language') : 'Language' }}">
         <option value="en">EN</option>
         <option value="de">DE</option>
       </select>

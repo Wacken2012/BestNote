@@ -2,7 +2,8 @@
   <header class="app-header">
     <h1>{{ $t('app.title') }}</h1>
     <div class="controls">
-        <select v-model="lang" @change="changeLang">
+        <label for="header-lang-select" class="visually-hidden">{{ $t('common.language') }}</label>
+        <select id="header-lang-select" v-model="lang" @change="changeLang" aria-label="{{ $t('common.language') }}">
           <option value="de">DE</option>
           <option value="en">EN</option>
         </select>

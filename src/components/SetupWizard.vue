@@ -1,6 +1,6 @@
 <template>
   <div data-testid="setup-wizard" class="setup-wizard" role="dialog" aria-modal="true" aria-labelledby="setup-title">
-    <h2 id="setup-title">{{ $t('setup.title') }}</h2>
+  <h1 id="setup-title">{{ $t('setup.title') }}</h1>
     <div class="progress" aria-hidden="true">
       <!-- expose progressbar semantics for assistive tech -->
       <progress

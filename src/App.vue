@@ -1,5 +1,5 @@
 <template>
-  <div id="app" class="app-root">
+  <div class="app-root">
     <Header />
     <div class="layout">
       <Sidebar />
