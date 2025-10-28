@@ -1,0 +1,32 @@
+name: Accessibility Diff
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+
+jobs:
+  accessibility-diff:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Playwright browsers
+        run: |
+          npm ci
+          npx playwright install --with-deps
+
+      - name: Run Playwright accessibility tests
+        run: |
+          npm run test:accessibility
+
+      - name: Collect playwright report and run a11y diff
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Playwright writes html report to playwright-report by default in our setup
+          python3 scripts/monitor_a11y_ci.py --auto-comment --branch "${{ github.head_ref }}" --run-id "${{ github.run_id }}" --local-report-dir playwright-report
