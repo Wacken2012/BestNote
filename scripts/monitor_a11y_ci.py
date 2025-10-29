@@ -89,6 +89,8 @@ def main():
     import argparse
     p = argparse.ArgumentParser()
     p.add_argument('--branch', required=True)
+    p.add_argument('--auto-comment', action='store_true', help='Post comment automatically when run finished')
+    p.add_argument('--run-id', type=int, help='Use an explicit workflow run id (skip polling)')
     p.add_argument('--artifact-name', default='playwright-report')
     p.add_argument('--poll-interval', type=int, default=15)
     args = p.parse_args()
@@ -114,52 +116,51 @@ def main():
 
     runs_url = f'https://api.github.com/repos/{owner}/{repo_name}/actions/runs?branch={urllib.parse.quote(args.branch)}&per_page=1'
 
-    run_id = None
-    while True:
-        try:
-            data = gh_api_request(runs_url, token)
-        except Exception as e:
-            print('GitHub API request failed:', e)
-            sys.exit(1)
-        runs = data.get('workflow_runs', [])
-        if not runs:
-            print('No runs found for branch yet; waiting', flush=True)
-            time.sleep(args.poll_interval)
-            run_id = None
-            # Poll the latest run for the branch. Use token API if available, otherwise use `gh api`.
-            while True:
-                try:
-                    if not use_gh:
-                        runs_url = f'https://api.github.com/repos/{owner}/{repo_name}/actions/runs?branch={urllib.parse.quote(args.branch)}&per_page=1'
-                        data = gh_api_request(runs_url, token)
-                    else:
-                        import subprocess
-                        cmd = ['gh', 'api', f'/repos/{owner}/{repo_name}/actions/runs?branch={urllib.parse.quote(args.branch)}&per_page=1']
-                        out = subprocess.check_output(cmd, text=True)
-                        data = json.loads(out)
-                except Exception as e:
-                    print('GitHub API request failed:', e)
-                    sys.exit(1)
-                runs = data.get('workflow_runs', [])
-                if not runs:
-                    print('No runs found for branch yet; waiting', flush=True)
-                    time.sleep(args.poll_interval)
-                    continue
-                run = runs[0]
-                run_id = run.get('id')
-                status = run.get('status')
-                conclusion = run.get('conclusion')
-                print(f'Found run id={run_id} status={status} conclusion={conclusion}')
-                if status == 'completed':
-                    print('Run completed with conclusion=', conclusion)
-                    break
-                print('Run not completed yet; polling...')
+    # If a run-id is provided, skip polling and use it directly
+    run_id = args.run_id
+    if not run_id:
+        # poll for the latest run for the branch
+        while True:
+            try:
+                data = gh_api_request(runs_url, token)
+            except Exception as e:
+                print('GitHub API request failed:', e)
+                sys.exit(1)
+            runs = data.get('workflow_runs', [])
+            if not runs:
+                print('No runs found for branch yet; waiting', flush=True)
                 time.sleep(args.poll_interval)
+                continue
+            run = runs[0]
+            run_id = run.get('id')
+            status = run.get('status')
+            conclusion = run.get('conclusion')
+            print(f'Found run id={run_id} status={status} conclusion={conclusion}')
+            if status == 'completed':
+                print('Run completed with conclusion=', conclusion)
+                break
+            print('Run not completed yet; polling...')
+            time.sleep(args.poll_interval)
 
     tmpd = Path(tempfile.mkdtemp(prefix='a11y-monitor-'))
     artifact_zip = tmpd / 'artifact.zip'
     print('Downloading artifact into', tmpd)
     if not use_gh:
+        # find the artifact archive download URL for the given run_id and artifact name
+        artifacts_api = f'https://api.github.com/repos/{owner}/{repo_name}/actions/runs/{run_id}/artifacts'
+        try:
+            art_data = gh_api_request(artifacts_api, token)
+            dl_url = None
+            for a in art_data.get('artifacts', []):
+                if a.get('name') == args.artifact_name:
+                    dl_url = a.get('archive_download_url')
+                    break
+            if not dl_url:
+                raise RuntimeError('Artifact not found for run')
+        except Exception as e:
+            print('Failed to locate artifact via API:', e)
+            sys.exit(1)
+
         print('Downloading artifact to', artifact_zip)
         download_url_to_file(dl_url, token, str(artifact_zip))
         print('Unzipping artifact...')
@@ -223,18 +224,88 @@ def main():
             lines.append(f'| `{rid}` | {impact} | {comp} | {help_md} | `{snippet}` |')
         return lines
 
-    # rebuild nicer markdown
+    # rebuild nicer markdown with impact-separated, collapsible sections
+    run_url = f'https://github.com/{owner}/{repo_name}/actions/runs/{run_id}' if run_id else ''
+
+    def build_tables_by_impact(keys, source_map):
+        # group keys by impact
+        groups = {'critical': [], 'serious': [], 'moderate': [], 'minor': []}
+        for rid, target in keys:
+            item = source_map.get((rid, target))
+            impact = (item.get('impact') if item else None) or 'minor'
+            impact = impact if impact in groups else 'minor'
+            groups[impact].append((rid, target))
+        lines = []
+        for impact in ['critical', 'serious', 'moderate', 'minor']:
+            lines.append(f'<details><summary>{impact.upper()} ({len(groups[impact])})</summary>')
+            lines.append('')
+            lines.extend(build_table(groups[impact], source_map))
+            lines.append('')
+            lines.append('</details>')
+            lines.append('')
+        return lines
+
+
+def find_component_by_snippet(snippet):
+    """Heuristic search: look for snippet text or selectors inside src/components and return best match.
+
+    This is a best-effort heuristic: search component files for occurrences of id/class names or the snippet text.
+    """
+    import re
+    root = Path('src')
+    if not root.exists():
+        return '-'
+    snippet = (snippet or '').strip()
+    candidates = {}
+    # look for id or class fragments like #foo or .bar in snippet
+    tokens = re.findall(r'[.#][A-Za-z0-9_-]+', snippet)
+    # also add word tokens
+    tokens += re.findall(r'[A-Za-z0-9_-]{4,}', snippet)
+    for p in root.rglob('*.vue'):
+        try:
+            txt = p.read_text(encoding='utf-8', errors='ignore')
+        except Exception:
+            continue
+        score = 0
+        for t in tokens:
+            if t.startswith('#') or t.startswith('.'):
+                if t[1:] in txt:
+                    score += 3
+            else:
+                if t in txt:
+                    score += 1
+        if score > 0:
+            candidates[str(p)] = score
+    if not candidates:
+        return '-'
+    # return best scoring path (short path)
+    best = max(candidates.items(), key=lambda kv: kv[1])[0]
+    return best
+
+
+def map_component(html):
+    # use the heuristic finder on snippet content
+    if not html:
+        return '-'
+    # trim long HTML
+    snippet = html[:240]
+    comp = find_component_by_snippet(snippet)
+    return comp
+
     md2 = []
     md2.append(f'### Accessibility Diff Report — run {run_id} on branch {args.branch}')
+    if run_url:
+        md2.append(f'Full run: {run_url}')
     md2.append('')
+
     md2.append('#### ✅ Fixed')
-    md2.extend(build_table(fixed, prev))
-    md2.append('')
+    md2.extend(build_tables_by_impact(fixed, prev))
+
     md2.append('#### ⚠️ Still Present')
-    md2.extend(build_table(still, curr))
-    md2.append('')
+    md2.extend(build_tables_by_impact(still, curr))
+
     md2.append('#### 🆕 New Violations')
-    md2.extend(build_table(new, curr))
+    md2.extend(build_tables_by_impact(new, curr))
 
     out_md2 = tmpd / 'accessibility-diff-pretty.md'
     out_md2.write_text('\n'.join(md2), encoding='utf-8')
