@@ -34,6 +34,10 @@ function logout() { auth.clear(); window.location.href = '/library' }
 </script>
 
 <style scoped>
-.app-header { display:flex; justify-content:space-between; align-items:center; padding:12px 16px; background:#1976d2; color:white }
-.controls select { padding:8px; border-radius:6px }
+.app-header { display:flex; justify-content:space-between; align-items:center; padding:12px 16px; background:#1976d2; color:#ffffff }
+.app-header h1 { margin:0; font-size:1.25rem; font-weight:600; color: #ffffff }
+.controls { display:flex; gap:8px; align-items:center }
+.controls select { padding:8px; border-radius:6px; background: rgba(255,255,255,0.08); color:#ffffff; border:1px solid rgba(255,255,255,0.12) }
+.controls .user { color: #ffffff }
+.app-header button { background: rgba(255,255,255,0.12); color:#ffffff; border:1px solid rgba(255,255,255,0.12); padding:6px 8px; border-radius:6px }
 </style>
