@@ -8,6 +8,16 @@ jobs:
   accessibility-diff:
     runs-on: ubuntu-latest
     steps:
+name: Accessibility Diff
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+
+jobs:
+  accessibility-diff:
+    runs-on: ubuntu-latest
+    steps:
       - uses: actions/checkout@v3
 
       - name: Set up Node.js
@@ -15,14 +25,28 @@ jobs:
         with:
           node-version: '20'
 
-      - name: Install Playwright browsers
+      - name: Run monitor unit tests
         run: |
-          npm ci
-          npx playwright install --with-deps
+          pip install pytest
+          pytest -q tests/test_monitor.py
+
+      - name: Install Playwright browsers and dependencies
+        uses: microsoft/playwright-github-action@v1
+        with:
+          install-deps: true
+          install-browsers: true
 
       - name: Run Playwright accessibility tests
         run: |
+          npm ci
           npm run test:accessibility
+
+      - name: Dry-run monitor (local report test)
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Exercise the monitor against the in-job playwright-report without posting comments
+          python3 scripts/monitor_a11y_ci.py --branch "${{ github.head_ref }}" --local-report-dir playwright-report --dry-run --verbose
 
       - name: Collect playwright report and run a11y diff
         env:
@@ -30,3 +54,4 @@ jobs:
         run: |
           # Playwright writes html report to playwright-report by default in our setup
           python3 scripts/monitor_a11y_ci.py --auto-comment --branch "${{ github.head_ref }}" --run-id "${{ github.run_id }}" --local-report-dir playwright-report
+        run: |
