@@ -8,6 +8,8 @@
     "preview": "vite preview",
     "lint": "eslint --ext .ts,.vue src || true",
     "test": "vitest run",
+  "test:accessibility": "npx playwright test --project=chromium --reporter=html --workers=1 --timeout=300000",
+  "playwright:install": "playwright install --with-deps",
     "test:importer": "vitest run tests/import --run"
   },
   "dependencies": {
@@ -39,5 +41,10 @@
     "vitest": "4.0.3"
     ,"supertest": "6.3.3"
     ,"@types/supertest": "2.0.12"
+    ,"playwright": "1.35.0"
+    ,"@playwright/test": "1.35.0"
+    ,"axe-core": "4.7.2"
+    ,"@axe-core/playwright": "4.7.2"
+    ,"serve": "14.1.2"
   }
 }

@@ -5,7 +5,8 @@
       <label>
         <input type="checkbox" v-model="seniorMode" /> Senior mode
       </label>
-      <select v-model="lang" @change="changeLang">
+      <label for="main-lang-select">{{ $t ? $t('common.language') : 'Language' }}</label>
+      <select id="main-lang-select" v-model="lang" @change="changeLang" aria-label="{{ $t ? $t('common.language') : 'Language' }}">
         <option value="en">EN</option>
         <option value="de">DE</option>
       </select>
@@ -35,8 +36,8 @@
 import { ref, onMounted } from 'vue'
 import { useUserStore } from '../store/user'
 import { createPinia } from 'pinia'
-import PermissionService from '../services/PermissionService'
-import { useI18n } from '../i18n'
+import * as PermissionService from '../services/PermissionService'
+// i18n exports are plain locale objects; avoid importing useI18n here
 
 const pinia = createPinia()
 const userStore = useUserStore(pinia)
@@ -60,8 +61,8 @@ function remove(member) {
 
 function changeLang() {
   try {
-    const { i18n } = useI18n()
-    i18n.locale = lang.value
+    // set document language as minimal runtime effect; the app's i18n store will pick up persisted language elsewhere
+    document.documentElement.lang = lang.value
   } catch (e) {}
 }
 

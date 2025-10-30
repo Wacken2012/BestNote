@@ -1,0 +1,4 @@
+Error: page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:5173/setup
+=========================== logs ===========================
+navigating to "http://localhost:5173/setup", waiting until "networkidle"
+============================================================

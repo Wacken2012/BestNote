@@ -1,19 +1,46 @@
 feature:
-  - src/**
+  - "src/**"
 bug:
-  - src/**
-docs:
-  - docs/**
-  - README*.md
-tests:
-  - tests/**
-ci:
-  - .github/workflows/**
-tests:
-  - "tests/**"
+  - "src/**"
 docs:
   - "docs/**"
   - "README*.md"
+tests:
+  - "tests/**"
+ci:
+  - ".github/workflows/**"
+directives:
+  - "src/directives/**"
+services:
+  - "src/services/**"
+stores:
+  - "src/stores/**"
+feature:
+  - "src/**"
+feature:
+  - "src/**"
+bug:
+  - "src/**"
+docs:
+  - "docs/**"
+  - "README*.md"
+tests:
+  - "tests/**"
+ci:
+  - ".github/workflows/**"
+directives:
+  - "src/directives/**"
+services:
+  - "src/services/**"
+feature:
+  - "src/**"
+bug:
+  - "src/**"
+docs:
+  - "docs/**"
+  - "README*.md"
+tests:
+  - "tests/**"
 ci:
   - ".github/workflows/**"
 directives:

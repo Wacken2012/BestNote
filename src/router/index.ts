@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import type { RouteRecordRaw, RouteLocationNormalized, NavigationGuardNext } from 'vue-router'
+import { useSetupStore } from '../store/setup'
 import { useUserStore } from '../store/user'
 import { useAuthStore } from '../store/auth'
 
@@ -10,21 +11,29 @@ const routes: RouteRecordRaw[] = [
   { path: '/members', name: 'Members', component: () => import('../views/MembersView.vue'), meta: { roles: ['admin','vorstand'] } },
   { path: '/events', name: 'Events', component: () => import('../views/EventsView.vue'), meta: { roles: ['admin','vorstand','mitglied'] } },
   { path: '/finances', name: 'Finances', component: () => import('../views/FinancesView.vue'), meta: { roles: ['admin','kassierer','vorstand'] } },
-  { path: '/settings', name: 'Settings', component: () => import('../views/SettingsView.vue'), meta: { roles: ['admin'] } }
+  { path: '/settings', name: 'Settings', component: () => import('../views/SettingsView.vue'), meta: { roles: ['admin'] } },
+  { path: '/import', name: 'MemberImport', component: () => import('../views/MemberImport.vue') },
+  { path: '/login', name: 'Login', component: () => import('../components/Login.vue') },
+  { path: '/setup', name: 'Setup', component: () => import('../components/SetupWizard.vue') }
 ]
 
 const router = createRouter({ history: createWebHistory(), routes })
 
-// Role-based guard
+// Combined guard: first ensure setup is completed, then enforce role-based access
 router.beforeEach((to: RouteLocationNormalized, from: RouteLocationNormalized, next: NavigationGuardNext) => {
-  const auth = useAuthStore()
-  const userStore = useUserStore()
+  const setup = useSetupStore()
+  // always allow setup route
+  if (to.name === 'Setup') return next()
+  if (!setup.setupCompleted) return next({ name: 'Setup' })
+
+  // Role-based checks (if route has meta.roles)
   const allowedRoles = (to.meta && (to.meta as any).roles) || null
   if (!allowedRoles) return next()
+  const auth = useAuthStore()
+  const userStore = useUserStore()
   const roles = (auth.roles && auth.roles.length) ? auth.roles : userStore.roles
   const has = roles.some((r:string) => (allowedRoles as string[]).includes(r))
   if (has) return next()
-  // otherwise redirect to library or show a 403 page in a real app
   return next('/library')
 })
 
