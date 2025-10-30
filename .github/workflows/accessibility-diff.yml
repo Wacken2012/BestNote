@@ -23,36 +23,49 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+        - name: Accessibility Diff
 
-      - name: Run monitor unit tests
-        run: |
-          pip install pytest
-          pytest -q tests/test_monitor.py
+  on:
+    pull_request:
+      types: [opened, synchronize]
 
-      - name: Install Playwright browsers and dependencies
-        uses: microsoft/playwright-github-action@v1
-        with:
-          install-deps: true
-          install-browsers: true
+  jobs:
+    accessibility-diff:
+      runs-on: ubuntu-latest
+      steps:
+        - uses: actions/checkout@v3
 
-      - name: Run Playwright accessibility tests
-        run: |
-          npm ci
-          npm run test:accessibility
+        - name: Set up Node.js
+          uses: actions/setup-node@v4
+          with:
+            node-version: '20'
 
-      - name: Dry-run monitor (local report test)
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          # Exercise the monitor against the in-job playwright-report without posting comments
-          python3 scripts/monitor_a11y_ci.py --branch "${{ github.head_ref }}" --local-report-dir playwright-report --dry-run --verbose
+        - name: Run monitor unit tests
+          run: |
+            python3 -m pip install pytest
+            pytest -q tests/test_monitor.py
 
-      - name: Collect playwright report and run a11y diff
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          # Playwright writes html report to playwright-report by default in our setup
-          # Use the local playwright-report directory so the monitor reads the in-job files
-          # and does not try to download the uploaded artifact (avoids 403 auth errors).
-          python3 scripts/monitor_a11y_ci.py --auto-comment --local-report-dir playwright-report
+        - name: Install Playwright browsers and dependencies
+          uses: microsoft/playwright-github-action@v1
+          with:
+            install-deps: true
+            install-browsers: true
+
+        - name: Run Playwright accessibility tests
+          run: |
+            npm ci
+            npm run test:accessibility
+
+        - name: Dry-run monitor (local report test)
+          env:
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          run: |
+            # Exercise the monitor against the in-job playwright-report without posting comments
+            python3 scripts/monitor_a11y_ci.py --branch "${{ github.head_ref }}" --local-report-dir playwright-report --dry-run --verbose
+
+        - name: Collect playwright report and run a11y diff
+          env:
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          run: |
+            # Use the local playwright-report directory to avoid artifact download/auth issues
+            python3 scripts/monitor_a11y_ci.py --auto-comment --local-report-dir playwright-report
