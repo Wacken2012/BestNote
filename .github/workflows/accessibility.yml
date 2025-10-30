@@ -69,9 +69,7 @@ jobs:
       - name: Post accessibility comment
         if: always()
         run: |
-          python3 scripts/monitor_a11y_ci.py \
-            --auto-comment \
-            --run-id ${{ github.run_id }} \
-            --branch ${{ github.head_ref }}
+          # Use local playwright-report (already present on runner) so monitor doesn't try to download artifact
+          python3 scripts/monitor_a11y_ci.py --auto-comment --local-report-dir playwright-report
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
