@@ -46,26 +46,13 @@ Screenshots folgen sobald das Frontend fertig ist
 ## 📄 Lizenz
 GPLv3 – siehe [LICENSE](./LICENSE)
 
-## 🤝 Mitwirken
-Siehe [CONTRIBUTING.md](./CONTRIBUTING.md)
-
----
-
-## 🧪 Teststrategie für Custom Directives
+##  Teststrategie für Custom Directives
 Dieses Projekt verwendet eigene Vue-Directives wie `v-can-upload`, die auf Pinia-Store-Daten reagieren.
 
 ### Beispiel: Test für `v-can-upload`
 - Nutze `Vue Test Utils` + `Vitest` mit `jsdom`
 - Stelle sicher, dass Directive und Test dieselbe Pinia-Instanz verwenden
 - Ändere Rollen im Test mit `userStore.$patch(...)`
-- Verwende `nextTick()` und ggf. `setTimeout(0)` für reaktive DOM-Updates
-- Prüfe Sichtbarkeit über `el.style.display` statt `isVisible()`
-
-### Testdatei: `tests/directives/canUpload.test.ts`
-Die Tests prüfen:
-- Sichtbarkeit bei erlaubten Rollen (z. B. Admin)
-- Verstecken bei nicht erlaubten Rollen (z. B. Kassierer ohne Musikerrolle)
-
 ---
 
 <!-- ======= ENGLISH PART ======= -->
@@ -82,10 +69,6 @@ BestNote simplifies organizing music groups by providing role-based access to sh
 - Access to sheet music by voice and role
 - Calendar integration (CalDAV-compatible)
 - Upload logic via `v-can-upload` directive
-# OpenMusikVerein / BestNote
-
-This repository contains BestNote — an AI-assisted sheet-music and calendar management app for music clubs.
-
 This project includes full documentation in German and English. Please choose a language:
 
 - German documentation: [README.de.md](README.de.md)
@@ -96,7 +79,6 @@ If you'd like, I can also commit these changes and push them to the configured r
 1. Create a git commit with the README split
 2. Rename the local branch to `main` and push to `origin` (the remote is configured but not pushed yet)
 
-<!-- End of landing README -->
 ## 🧪 Test strategy
 
 See section [Test strategy for custom directives](#test-strategy-for-custom-directives)
@@ -108,34 +90,23 @@ This project includes small Node.js helper scripts in `scripts/` to import and m
 ## 🚀 Deployment / Demo
 
 We publish a demo build of the frontend. Two common options:
-
 - GitHub Pages (simple static hosting): configured for this repo using `gh-pages`.
   - Build: `npm run build`
   - Deploy: `npm run deploy` (pushes `dist/` to `gh-pages` branch)
   - Vite base is set to `/BestNote/` so GitHub Pages serves assets correctly.
 
 - Vercel / Netlify (recommended for automatic CI/CD): import the repo on vercel.com or netlify and point to the `main` branch. Vercel auto-detects Vite projects and serves the built `dist/` including the service worker.
-
 Demo URL (once deployed): https://Wacken2012.github.io/BestNote/
 
 Pages demo: https://Wacken2012.github.io/BestNote/
 
 <!-- GitHub Pages badge -->
-[![GitHub Pages](https://img.shields.io/badge/pages-deployed-brightgreen)](https://Wacken2012.github.io/BestNote/)
-
-CI: A `deploy.yml` GitHub Actions workflow is provided to build and deploy on pushes to `main`.
-
 ````markdown
 # OpenMusikVerein / BestNote
-
-Diese Datei ist zweisprachig. | This file is bilingual.
-
-🇩🇪 Deutsch | 🇬🇧 English below
 
 ---
 
 ## 🇩🇪 Deutsch
-
 ### 🧩 Projektübersicht
 BestNote — KI-gestütztes Noten- und Kalenderverwaltungssystem für Musikvereine.
 
