@@ -26,6 +26,10 @@ jobs:
       - name: Build site
         run: npm run build
 
+      - name: Verify service worker presence
+        run: |
+          if [ -f dist/service-worker.js ]; then echo "SW present"; else echo "SW missing"; ls -la dist || true; exit 1; fi
+
       - name: Serve built site (SPA fallback)
         run: npx serve -s dist -l 5173 &
 
