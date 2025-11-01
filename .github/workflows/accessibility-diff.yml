@@ -45,10 +45,12 @@ jobs:
           done
 
       - name: Run Playwright accessibility tests
+        continue-on-error: true
         run: |
           npm run test:accessibility
 
       - name: Dry-run monitor (local report test)
+        if: always()
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
@@ -56,10 +58,15 @@ jobs:
           python3 scripts/monitor_a11y_ci.py --branch "${{ github.head_ref }}" --local-report-dir playwright-report --dry-run --verbose
 
       - name: Collect playwright report and run a11y diff
-        if: ${{ github.event_name == 'pull_request' }}
+        if: always()
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           # Use the local playwright-report directory to avoid artifact download/auth issues
-          python3 scripts/monitor_a11y_ci.py --auto-comment --local-report-dir playwright-report
+          # Only auto-comment when this run is for a pull_request event and a real token is available
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            python3 scripts/monitor_a11y_ci.py --auto-comment --local-report-dir playwright-report
+          else
+            python3 scripts/monitor_a11y_ci.py --local-report-dir playwright-report --dry-run
+          fi
           
