@@ -23,14 +23,13 @@ jobs:
         run: pytest -q tests/test_monitor.py
 
       - name: Install Playwright browsers and dependencies
-        uses: microsoft/playwright-github-action@v1
-        with:
-          install-deps: true
-          install-browsers: true
+        run: |
+          # Install node deps and Playwright browsers using the recommended CLI
+          npm ci
+          npx playwright install --with-deps
 
       - name: Run Playwright accessibility tests
         run: |
-          npm ci
           npm run test:accessibility
 
       - name: Dry-run monitor (local report test)
