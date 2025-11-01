@@ -88,7 +88,7 @@ def extract_playwright_from_index(index_html_path, out_dir):
 def main():
     import argparse
     p = argparse.ArgumentParser()
-    # --branch is optional when running against a local report directory (dry-run in CI)
+    # --branch defaults to empty; we'll validate after parsing (allowed when using --local-report-dir)
     p.add_argument('--branch', required=False, default='')
     p.add_argument('--auto-comment', action='store_true', help='Post comment automatically when run finished')
     # local report usage (inside the same job): skip GitHub artifact download and read the playwright-report dir
@@ -99,6 +99,16 @@ def main():
     p.add_argument('--artifact-name', default='playwright-report')
     p.add_argument('--poll-interval', type=int, default=15)
     args = p.parse_args()
+
+    # Early markers for dry-run / verbose so CI logs can be grepped even if something later fails
+    if getattr(args, 'dry_run', False):
+        print('[DRY-RUN] Dry-run mode enabled: will not post comments')
+    if getattr(args, 'verbose', False):
+        print('[VERBOSE] Starting verbose output...')
+
+    # Validation: require either a branch or a local report directory
+    if not args.local_report_dir and not args.branch:
+        p.error('Either --branch or --local-report-dir must be provided.')
 
     token = os.environ.get('GITHUB_TOKEN') or os.environ.get('GH_TOKEN')
     gh_cli = shutil.which('gh')
