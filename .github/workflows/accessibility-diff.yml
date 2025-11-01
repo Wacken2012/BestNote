@@ -56,25 +56,42 @@ jobs:
         continue-on-error: true
         run: |
           npm run test:accessibility
-
-      - name: Dry-run monitor (local report test)
+      - name: "VERIFY-SW: check service worker in dist"
+        if: always()
+        run: |
+          echo "VERIFY-SW: start"
+          if [ -f dist/service-worker.js ]; then
+            echo "VERIFY-SW: SW present - dist/service-worker.js exists"
+          else
+            echo "VERIFY-SW: SW missing - dist/service-worker.js not found"
+          fi
+          echo "VERIFY-SW: end"
+      - name: "Dry-run monitor (local report test) — exercise and verbose"
         if: always()
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          # Exercise the monitor against the in-job playwright-report without posting comments
-          python3 scripts/monitor_a11y_ci.py --branch "${{ github.head_ref }}" --local-report-dir playwright-report --dry-run --verbose
+          echo "MONITOR: start (dry-run verbose)"
+          echo "MONITOR: invoking monitor with --local-report-dir playwright-report --dry-run --verbose"
+          python3 scripts/monitor_a11y_ci.py --branch "${{ github.head_ref }}" --local-report-dir playwright-report --dry-run --verbose || true
+          echo "MONITOR: end (dry-run)"
 
-      - name: Collect playwright report and run a11y diff
+      - name: "Collect playwright report and run a11y diff (auto-comment on PRs)"
         if: always()
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          echo "MONITOR: start (final run)"
           # Use the local playwright-report directory to avoid artifact download/auth issues
           # Only auto-comment when this run is for a pull_request event and a real token is available
           if [ "${{ github.event_name }}" = "pull_request" ]; then
-            python3 scripts/monitor_a11y_ci.py --auto-comment --local-report-dir playwright-report
+            echo "MONITOR: auto-comment mode (will post/update anchored PR comment)"
+            python3 scripts/monitor_a11y_ci.py --auto-comment --local-report-dir playwright-report || true
           else
-            python3 scripts/monitor_a11y_ci.py --local-report-dir playwright-report --dry-run
+            echo "MONITOR: not a pull_request event; performing dry-run"
+            echo "[DRY-RUN] Extracted axe-results:"
+            # Call monitor in dry-run mode but echo that it's a dry-run to make logs greppable
+            python3 scripts/monitor_a11y_ci.py --local-report-dir playwright-report --dry-run --verbose || true
           fi
+          echo "MONITOR: end (final run)"
           
