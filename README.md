@@ -116,7 +116,12 @@ We publish a demo build of the frontend. Two common options:
 
 - Vercel / Netlify (recommended for automatic CI/CD): import the repo on vercel.com or netlify and point to the `main` branch. Vercel auto-detects Vite projects and serves the built `dist/` including the service worker.
 
-Demo URL (once deployed): https://<your-user-or-org>.github.io/BestNote/
+Demo URL (once deployed): https://Wacken2012.github.io/BestNote/
+
+Pages demo: https://Wacken2012.github.io/BestNote/
+
+<!-- GitHub Pages badge -->
+[![GitHub Pages](https://img.shields.io/badge/pages-deployed-brightgreen)](https://Wacken2012.github.io/BestNote/)
 
 CI: A `deploy.yml` GitHub Actions workflow is provided to build and deploy on pushes to `main`.
 
