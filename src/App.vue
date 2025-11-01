@@ -9,6 +9,7 @@
       </main>
     </div>
     <Toasts />
+    <SwUpdateToast />
   </div>
 </template>
 
@@ -17,6 +18,7 @@ import Header from './components/Header.vue'
 import Sidebar from './components/Sidebar.vue'
 import MainDashboard from './components/MainDashboard.vue'
 import Toasts from './components/Toasts.vue'
+import SwUpdateToast from './components/SwUpdateToast.vue'
 import { ref } from 'vue'
 
 // Toggle via Vite env var VITE_SHOW_DASHBOARD (default: true)
