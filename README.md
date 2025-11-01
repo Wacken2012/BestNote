@@ -105,6 +105,21 @@ See section [Test strategy for custom directives](#test-strategy-for-custom-dire
 
 This project includes small Node.js helper scripts in `scripts/` to import and migrate member data.
 
+## 🚀 Deployment / Demo
+
+We publish a demo build of the frontend. Two common options:
+
+- GitHub Pages (simple static hosting): configured for this repo using `gh-pages`.
+  - Build: `npm run build`
+  - Deploy: `npm run deploy` (pushes `dist/` to `gh-pages` branch)
+  - Vite base is set to `/BestNote/` so GitHub Pages serves assets correctly.
+
+- Vercel / Netlify (recommended for automatic CI/CD): import the repo on vercel.com or netlify and point to the `main` branch. Vercel auto-detects Vite projects and serves the built `dist/` including the service worker.
+
+Demo URL (once deployed): https://<your-user-or-org>.github.io/BestNote/
+
+CI: A `deploy.yml` GitHub Actions workflow is provided to build and deploy on pushes to `main`.
+
 ````markdown
 # OpenMusikVerein / BestNote
 
