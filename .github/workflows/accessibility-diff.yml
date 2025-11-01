@@ -22,11 +22,27 @@ jobs:
       - name: Run monitor unit tests
         run: pytest -q tests/test_monitor.py
 
+      - name: Install dependencies
+        run: |
+          npm ci
+
       - name: Install Playwright browsers and dependencies
         run: |
-          # Install node deps and Playwright browsers using the recommended CLI
-          npm ci
+          # Install Playwright browsers using the recommended CLI
           npx playwright install --with-deps
+
+      - name: Start dev server
+        run: |
+          npm run dev -- --port 5173 &
+        env:
+          NODE_ENV: test
+
+      - name: Wait for server to be ready
+        run: |
+          for i in {1..10}; do
+            curl -sSf http://localhost:5173 && break
+            sleep 2
+          done
 
       - name: Run Playwright accessibility tests
         run: |
