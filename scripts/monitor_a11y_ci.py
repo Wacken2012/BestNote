@@ -88,8 +88,13 @@ def extract_playwright_from_index(index_html_path, out_dir):
 def main():
     import argparse
     p = argparse.ArgumentParser()
-    p.add_argument('--branch', required=True)
+    # --branch is optional when running against a local report directory (dry-run in CI)
+    p.add_argument('--branch', required=False, default='')
     p.add_argument('--auto-comment', action='store_true', help='Post comment automatically when run finished')
+    # local report usage (inside the same job): skip GitHub artifact download and read the playwright-report dir
+    p.add_argument('--local-report-dir', help='Path to a local playwright-report directory to use instead of downloading the artifact')
+    p.add_argument('--dry-run', action='store_true', help='Do not post comments or mutate GitHub; useful for CI dry-runs')
+    p.add_argument('--verbose', action='store_true', help='Verbose logging')
     p.add_argument('--run-id', type=int, help='Use an explicit workflow run id (skip polling)')
     p.add_argument('--artifact-name', default='playwright-report')
     p.add_argument('--poll-interval', type=int, default=15)
@@ -98,7 +103,8 @@ def main():
     token = os.environ.get('GITHUB_TOKEN') or os.environ.get('GH_TOKEN')
     gh_cli = shutil.which('gh')
     use_gh = False
-    if not token:
+    if not token and not args.local_report_dir:
+        # if we're given a local report dir we don't require a token
         if gh_cli:
             print('No GITHUB_TOKEN found — falling back to GitHub CLI (gh)')
             use_gh = True
@@ -113,6 +119,33 @@ def main():
         sys.exit(2)
     owner, repo_name = repo
     print(f'Watching runs for {owner}/{repo_name} branch {args.branch}')
+
+    # If a local report directory is provided, prefer that and skip artifact download
+    if args.local_report_dir:
+        if args.verbose:
+            print('[VERBOSE] Running with --local-report-dir', args.local_report_dir)
+        if args.dry_run:
+            print('[DRY-RUN] Dry-run mode enabled: will not post comments')
+        # locate index.html inside the provided directory
+        local_path = Path(args.local_report_dir)
+        idx = None
+        if local_path.exists():
+            for pth in local_path.rglob('index.html'):
+                idx = pth
+                break
+        if not idx:
+            print('index.html not found inside local report dir', args.local_report_dir)
+            sys.exit(1)
+        tmpd = Path(tempfile.mkdtemp(prefix='a11y-monitor-'))
+        play_report_dir = tmpd / 'playwright-report'
+        play_report_dir.mkdir(parents=True, exist_ok=True)
+        try:
+            extract_playwright_from_index(str(idx), str(play_report_dir))
+        except Exception as e:
+            print('Failed to extract embedded Playwright ZIP from local report:', e)
+            sys.exit(1)
+        print('Extracted playwright report into', play_report_dir)
+        # continue to the reporting/triage section below using tmpd and play_report_dir
 
     runs_url = f'https://api.github.com/repos/{owner}/{repo_name}/actions/runs?branch={urllib.parse.quote(args.branch)}&per_page=1'
 
@@ -142,10 +175,12 @@ def main():
             print('Run not completed yet; polling...')
             time.sleep(args.poll_interval)
 
-    tmpd = Path(tempfile.mkdtemp(prefix='a11y-monitor-'))
-    artifact_zip = tmpd / 'artifact.zip'
-    print('Downloading artifact into', tmpd)
-    if not use_gh:
+    # if local-report-dir was used above we will already have tmpd and play_report_dir
+    if not args.local_report_dir:
+        tmpd = Path(tempfile.mkdtemp(prefix='a11y-monitor-'))
+        artifact_zip = tmpd / 'artifact.zip'
+        print('Downloading artifact into', tmpd)
+        if not use_gh:
         # find the artifact archive download URL for the given run_id and artifact name
         artifacts_api = f'https://api.github.com/repos/{owner}/{repo_name}/actions/runs/{run_id}/artifacts'
         try:
@@ -176,7 +211,7 @@ def main():
             print('gh run download failed:', e)
             sys.exit(1)
 
-    # find index.html inside extracted artifact
+    # find index.html inside extracted artifact (or from local report extraction)
     idx = None
     for p in tmpd.rglob('index.html'):
         idx = p
