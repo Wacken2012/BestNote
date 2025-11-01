@@ -198,6 +198,25 @@ This project uses Vue directives like `v-can-upload` that react to Pinia store d
 
 ### Example: test for `v-can-upload`
 - Use `Vue Test Utils` + `Vitest` with `jsdom`
+
+---
+
+## Update strategy (PWA / Service Worker)
+
+This project ships a simple Service Worker to provide an App Shell caching strategy and a lightweight update flow.
+
+- The Service Worker caches essential assets (index.html, favicon) on install and serves the cached App Shell during navigation.
+- When a new deployment is published, the browser will download a new service worker; once installed it will dispatch an event so the app can notify users that an update is available.
+- Users can opt to reload the page to activate the new version. The SW will skip waiting when commanded via the `SKIP_WAITING` message.
+
+Developer notes:
+
+- The SW file is located at `src/service-worker.js` and is registered from `src/main.ts`.
+- Deployments should update the built assets and optionally bump the `CACHE_NAME` value to force a full cache refresh.
+- CI/CD: Build and publish to your static host (GitHub Pages, Netlify, Vercel, S3 + CloudFront) on merges to `main`.
+
+Suggested CI step (GitHub Actions): build and deploy on `push` to `main`; invalidate CDN cache if necessary.
+
 - Ensure directive and test use the same Pinia instance
 - Change roles in tests with `userStore.$patch(...)`
 - Use `nextTick()` and, if necessary, `setTimeout(0)` for reactive DOM updates
