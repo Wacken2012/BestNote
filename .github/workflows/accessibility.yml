@@ -26,6 +26,25 @@ jobs:
       - name: Build site
         run: npm run build
 
+      - name: Force checkout latest commit
+        if: always()
+        run: |
+          # Ensure runner uses the exact commit we pushed (deterministic script version)
+          git fetch --no-tags origin "${{ github.sha }}"
+          git checkout "${{ github.sha }}"
+
+      - name: Verify service worker presence
+        if: always()
+        run: |
+          echo "VERIFY-SW: start"
+          if [ -f dist/service-worker.js ]; then
+            echo "VERIFY-SW: SW present"
+          else
+            echo "VERIFY-SW: MISSING"
+            ls -la dist || true
+            exit 1
+          fi
+
       - name: Serve built site (SPA fallback)
         run: npx serve -s dist -l 5173 &
 
@@ -66,12 +85,26 @@ jobs:
           name: playwright-report
           path: playwright-report
 
+      - name: Debug: Confirm script version and commit
+        if: always()
+        run: |
+          echo "Commit SHA:"
+          git rev-parse --short HEAD
+          echo "Python version:"
+          python3 -V
+          echo "Script head:"
+          head -n 20 scripts/monitor_a11y_ci.py || true
+          echo "Monitor help output:"
+          python3 scripts/monitor_a11y_ci.py --help || true
+
       - name: Post accessibility comment
         if: always()
         run: |
-          python3 scripts/monitor_a11y_ci.py \
-            --auto-comment \
-            --run-id ${{ github.run_id }} \
-            --branch ${{ github.head_ref }}
+          # Use local playwright-report (already present on runner) so monitor doesn't try to download artifact
+          # Determine a branch to use: prefer github.head_ref (PR), fallback to github.ref_name (push/workflow_dispatch)
+          BRANCH="${{ github.head_ref }}"
+          if [ -z "$BRANCH" ]; then BRANCH="${{ github.ref_name }}"; fi
+          echo "Using branch: $BRANCH"
+          python3 scripts/monitor_a11y_ci.py --branch "$BRANCH" --auto-comment --local-report-dir playwright-report
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

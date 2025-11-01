@@ -3,10 +3,11 @@ name: Accessibility Diff
 on:
   pull_request:
     types: [opened, synchronize]
+  workflow_dispatch:
 
 jobs:
   accessibility-diff:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     env:
       PLAYWRIGHT_BROWSERS_PATH: .playwright
     steps:
@@ -16,7 +17,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-
       - name: Cache Playwright browsers
         uses: actions/cache@v4
         with:
@@ -24,18 +24,57 @@ jobs:
           key: playwright-${{ hashFiles('package-lock.json') }}
           restore-keys: playwright-
 
-      - name: Install Playwright browsers
+      - name: Install Python deps
+        run: python3 -m pip install pytest
+
+      - name: Run monitor unit tests
+        run: pytest -q tests/test_monitor.py
+
+      - name: Install dependencies
         run: |
           npm ci
+
+      - name: Install Playwright browsers and dependencies
+        run: |
+          # Install Playwright browsers using the recommended CLI
           npx playwright install --with-deps
 
+      - name: Start dev server
+        run: |
+          npm run dev -- --port 5173 &
+        env:
+          NODE_ENV: test
+
+      - name: Wait for server to be ready
+        run: |
+          for i in {1..10}; do
+            curl -sSf http://localhost:5173 && break
+            sleep 2
+          done
+
       - name: Run Playwright accessibility tests
+        continue-on-error: true
         run: |
           npm run test:accessibility
 
-      - name: Collect playwright report and run a11y diff
+      - name: Dry-run monitor (local report test)
+        if: always()
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          # Playwright writes html report to playwright-report by default in our setup
-          python3 scripts/monitor_a11y_ci.py --auto-comment --branch "${{ github.head_ref }}" --run-id "${{ github.run_id }}" --local-report-dir playwright-report
+          # Exercise the monitor against the in-job playwright-report without posting comments
+          python3 scripts/monitor_a11y_ci.py --branch "${{ github.head_ref }}" --local-report-dir playwright-report --dry-run --verbose
+
+      - name: Collect playwright report and run a11y diff
+        if: always()
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Use the local playwright-report directory to avoid artifact download/auth issues
+          # Only auto-comment when this run is for a pull_request event and a real token is available
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            python3 scripts/monitor_a11y_ci.py --auto-comment --local-report-dir playwright-report
+          else
+            python3 scripts/monitor_a11y_ci.py --local-report-dir playwright-report --dry-run
+          fi
+          

@@ -105,6 +105,21 @@ See section [Test strategy for custom directives](#test-strategy-for-custom-dire
 
 This project includes small Node.js helper scripts in `scripts/` to import and migrate member data.
 
+## 🚀 Deployment / Demo
+
+We publish a demo build of the frontend. Two common options:
+
+- GitHub Pages (simple static hosting): configured for this repo using `gh-pages`.
+  - Build: `npm run build`
+  - Deploy: `npm run deploy` (pushes `dist/` to `gh-pages` branch)
+  - Vite base is set to `/BestNote/` so GitHub Pages serves assets correctly.
+
+- Vercel / Netlify (recommended for automatic CI/CD): import the repo on vercel.com or netlify and point to the `main` branch. Vercel auto-detects Vite projects and serves the built `dist/` including the service worker.
+
+Demo URL (once deployed): https://<your-user-or-org>.github.io/BestNote/
+
+CI: A `deploy.yml` GitHub Actions workflow is provided to build and deploy on pushes to `main`.
+
 ````markdown
 # OpenMusikVerein / BestNote
 
@@ -198,6 +213,25 @@ This project uses Vue directives like `v-can-upload` that react to Pinia store d
 
 ### Example: test for `v-can-upload`
 - Use `Vue Test Utils` + `Vitest` with `jsdom`
+
+---
+
+## Update strategy (PWA / Service Worker)
+
+This project ships a simple Service Worker to provide an App Shell caching strategy and a lightweight update flow.
+
+- The Service Worker caches essential assets (index.html, favicon) on install and serves the cached App Shell during navigation.
+- When a new deployment is published, the browser will download a new service worker; once installed it will dispatch an event so the app can notify users that an update is available.
+- Users can opt to reload the page to activate the new version. The SW will skip waiting when commanded via the `SKIP_WAITING` message.
+
+Developer notes:
+
+- The SW file is located at `src/service-worker.js` and is registered from `src/main.ts`.
+- Deployments should update the built assets and optionally bump the `CACHE_NAME` value to force a full cache refresh.
+- CI/CD: Build and publish to your static host (GitHub Pages, Netlify, Vercel, S3 + CloudFront) on merges to `main`.
+
+Suggested CI step (GitHub Actions): build and deploy on `push` to `main`; invalidate CDN cache if necessary.
+
 - Ensure directive and test use the same Pinia instance
 - Change roles in tests with `userStore.$patch(...)`
 - Use `nextTick()` and, if necessary, `setTimeout(0)` for reactive DOM updates

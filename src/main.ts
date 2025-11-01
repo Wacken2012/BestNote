@@ -33,6 +33,37 @@ try { (window as any).APP_READY_FOR_TESTS = false } catch (e) { /* noop in non-b
 
 // Immediate fallback: mark app ready for tests right after mount so tests don't hang
 try {
+
+// Service Worker registration and update notification
+try {
+	if ('serviceWorker' in navigator) {
+		navigator.serviceWorker.register('/service-worker.js').then(reg => {
+			console.info('SW registered:', reg.scope)
+			// listen for updatefound to notify user
+			reg.addEventListener('updatefound', () => {
+				const newWorker = reg.installing
+				if (newWorker) {
+					newWorker.addEventListener('statechange', () => {
+						if (newWorker.state === 'installed') {
+							// A new SW is installed: notify the user via a custom event so app can show a toast
+							window.dispatchEvent(new CustomEvent('sw-update-available'))
+						}
+					})
+				}
+			})
+		}).catch(err => console.warn('SW registration failed', err))
+
+		// listen to client messages from the SW
+		navigator.serviceWorker.addEventListener('message', ev => {
+			try {
+				if (ev.data && ev.data.type === 'SW_ACTIVATED') {
+					console.info('Service worker activated:', ev.data.cache)
+				}
+			} catch (e) {}
+		})
+	}
+} catch (e) {}
+
 	;(window as any).APP_READY_FOR_TESTS = true
 	try { console.info('APP_READY_FOR_TESTS set (immediate fallback after mount)') } catch (e) {}
 } catch (e) { /* noop in non-browser env */ }

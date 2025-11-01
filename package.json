@@ -4,12 +4,14 @@
   "private": true,
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+  "build": "vite build",
+  "postbuild": "cp src/service-worker.js dist/ || true",
     "preview": "vite preview",
     "lint": "eslint --ext .ts,.vue src || true",
     "test": "vitest run",
   "test:accessibility": "npx playwright test --project=chromium --reporter=html --workers=1 --timeout=300000",
   "playwright:install": "playwright install --with-deps",
+    "deploy": "gh-pages -d dist",
     "test:importer": "vitest run tests/import --run"
   },
   "dependencies": {
@@ -46,5 +48,6 @@
     ,"axe-core": "4.7.2"
     ,"@axe-core/playwright": "4.7.2"
     ,"serve": "14.1.2"
+    ,"gh-pages": "5.0.0"
   }
 }
