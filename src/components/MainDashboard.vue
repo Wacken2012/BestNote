@@ -12,9 +12,15 @@
       </select>
     </div>
 
-    <table>
+    <table aria-label="Members list">
+      <caption class="sr-only">Members</caption>
       <thead>
-        <tr><th>#</th><th>Name</th><th>Role</th><th>Actions</th></tr>
+        <tr>
+          <th scope="col">#</th>
+          <th scope="col">Name</th>
+          <th scope="col">Role</th>
+          <th scope="col">Actions</th>
+        </tr>
       </thead>
       <tbody>
         <tr v-for="(m, idx) in members" :key="m.id">
@@ -81,4 +87,30 @@ onMounted(async () => {
 <style scoped>
 table { width: 100%; border-collapse: collapse }
 td, th { padding: 8px; border: 1px solid #ddd }
+
+/* Improve header contrast and provide an accessible visual style */
+th {
+  background-color: var(--a11y-table-header-bg, #0b3b56);
+  color: var(--a11y-table-header-fg, #ffffff);
+  font-weight: 600;
+}
+
+/* Ensure focus styles for interactive controls inside the table */
+button:focus {
+  outline: 3px solid rgba(255,255,0,0.6);
+  outline-offset: 2px;
+}
+
+/* Visually hidden (screen-reader only) helper */
+.sr-only {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
 </style>
