@@ -1,0 +1,1 @@
+import{_ as e,c as t,o as n,a as s}from"./index-CVyuXz5u.js";const c={},o=s("h2",null,"Einstellungen (TODO)",-1),_=[o];function a(r,l){return n(),t("div",null,_)}const d=e(c,[["render",a]]);export{d as default};

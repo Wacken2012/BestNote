@@ -1,0 +1,1 @@
+import{_ as e,c as n,o as c,a as o}from"./index-CVyuXz5u.js";const s={},t=o("h2",null,"Finanzen (TODO)",-1),a=[t];function _(r,i){return c(),n("div",null,a)}const d=e(s,[["render",_]]);export{d as default};
