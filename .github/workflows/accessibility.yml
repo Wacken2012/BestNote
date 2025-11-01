@@ -26,9 +26,24 @@ jobs:
       - name: Build site
         run: npm run build
 
-      - name: Verify service worker presence
+      - name: Force checkout latest commit
+        if: always()
         run: |
-          if [ -f dist/service-worker.js ]; then echo "SW present"; else echo "SW missing"; ls -la dist || true; exit 1; fi
+          # Ensure runner uses the exact commit we pushed (deterministic script version)
+          git fetch --no-tags origin "${{ github.sha }}"
+          git checkout "${{ github.sha }}"
+
+      - name: Verify service worker presence
+        if: always()
+        run: |
+          echo "VERIFY-SW: start"
+          if [ -f dist/service-worker.js ]; then
+            echo "VERIFY-SW: SW present"
+          else
+            echo "VERIFY-SW: MISSING"
+            ls -la dist || true
+            exit 1
+          fi
 
       - name: Serve built site (SPA fallback)
         run: npx serve -s dist -l 5173 &
