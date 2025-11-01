@@ -15,10 +15,11 @@ jobs:
         with:
           node-version: '20'
 
+      - name: Install Python deps
+        run: python3 -m pip install pytest
+
       - name: Run monitor unit tests
-        run: |
-          python3 -m pip install pytest
-          pytest -q tests/test_monitor.py
+        run: pytest -q tests/test_monitor.py
 
       - name: Install Playwright browsers and dependencies
         uses: microsoft/playwright-github-action@v1
@@ -28,50 +29,21 @@ jobs:
 
       - name: Run Playwright accessibility tests
         run: |
-          name: Accessibility Diff
+          npm ci
+          npm run test:accessibility
 
-          on:
-            pull_request:
-              types: [opened, synchronize]
+      - name: Dry-run monitor (local report test)
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Exercise the monitor against the in-job playwright-report without posting comments
+          python3 scripts/monitor_a11y_ci.py --branch "${{ github.head_ref }}" --local-report-dir playwright-report --dry-run --verbose
 
-          jobs:
-            accessibility-diff:
-              runs-on: ubuntu-latest
-              steps:
-                - uses: actions/checkout@v3
-
-                - name: Set up Node.js
-                  uses: actions/setup-node@v4
-                  with:
-                    node-version: '20'
-
-                - name: Run monitor unit tests
-                  run: |
-                    python3 -m pip install pytest
-                    pytest -q tests/test_monitor.py
-
-                - name: Install Playwright browsers and dependencies
-                  uses: microsoft/playwright-github-action@v1
-                  with:
-                    install-deps: true
-                    install-browsers: true
-
-                - name: Run Playwright accessibility tests
-                  run: |
-                    npm ci
-                    npm run test:accessibility
-
-                - name: Dry-run monitor (local report test)
-                  env:
-                    GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-                  run: |
-                    # Exercise the monitor against the in-job playwright-report without posting comments
-                    python3 scripts/monitor_a11y_ci.py --branch "${{ github.head_ref }}" --local-report-dir playwright-report --dry-run --verbose
-
-                - name: Collect playwright report and run a11y diff
-                  env:
-                    GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-                  run: |
-                    # Use the local playwright-report directory to avoid artifact download/auth issues
-                    python3 scripts/monitor_a11y_ci.py --auto-comment --local-report-dir playwright-report
-
+      - name: Collect playwright report and run a11y diff
+        if: ${{ github.event_name == 'pull_request' }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Use the local playwright-report directory to avoid artifact download/auth issues
+          python3 scripts/monitor_a11y_ci.py --auto-comment --local-report-dir playwright-report
+          
