@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "vite",
   "build": "vite build",
-  "postbuild": "cp service-worker.js dist/service-worker.js || true",
+  "postbuild": "cp dist/sw.js dist/service-worker.js || true",
     "preview": "vite preview",
     "lint": "eslint --ext .ts,.vue src || true",
     "test": "vitest run",
