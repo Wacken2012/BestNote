@@ -14,3 +14,11 @@ test('Note editor is accessible', async ({ page }) => {
   await expect(page.locator('label[for="title"]')).toBeVisible()
   await expect(page.locator('#title')).toBeVisible()
 })
+
+test('Note creation works', async ({ page }) => {
+  await page.goto('/create')
+  await page.fill('#title', 'Neue Testnotiz')
+  await page.fill('#content', 'Dies ist ein Testinhalt')
+  await page.click('button[type="submit"]')
+  await expect(page).toHaveURL(/\/notes\/\d+/)
+})
