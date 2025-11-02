@@ -1,8 +1,7 @@
 <template>
-  <h2>Setup</h2>
-  <p>Hier kannst du die Konfiguration starten.</p>
+  <SetupWizard />
 </template>
 
 <script setup lang="ts">
-// Optional: Setup logic
+import SetupWizard from '@/components/SetupWizard.vue'
 </script>

@@ -1,4 +1,9 @@
 {
+  "members": { "title": "Members" },
+  "common": { "language": "Language" },
+  "role": "Role",
+  "canView": "Can view",
+  "canUpload": "Can upload",
   "setup": {
     "title": "Setup",
     "step": "Step",

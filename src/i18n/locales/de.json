@@ -1,4 +1,9 @@
 {
+  "members": { "title": "Mitglieder" },
+  "common": { "language": "Sprache" },
+  "role": "Rolle",
+  "canView": "Kann ansehen",
+  "canUpload": "Kann hochladen",
   "setup": {
     "title": "Einrichtung",
     "step": "Schritt",
