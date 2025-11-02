@@ -10,13 +10,11 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { useNoteStore } from '../stores/noteStore'
 import NoteCard from '@/components/NoteCard.vue'
 
-const notes = ref([
-  { id: 1, title: 'Erste Notiz', content: 'Inhalt der ersten Notiz' },
-  { id: 2, title: 'Zweite Notiz', content: 'Inhalt der zweiten Notiz' },
-])
+const store = useNoteStore()
+const notes = store.notes
 </script>
 
 <style scoped>
