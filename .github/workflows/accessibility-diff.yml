@@ -77,6 +77,14 @@ jobs:
           python3 scripts/monitor_a11y_ci.py --branch "${{ github.head_ref }}" --local-report-dir playwright-report --dry-run --verbose || true
           echo "MONITOR: end (dry-run)"
 
+      - name: "Debug: Check Playwright report"
+        if: always()
+        run: |
+          echo "DEBUG: listing playwright-report"
+          ls -la playwright-report || true
+          echo "DEBUG: searching for axe-results or base64 in report files"
+          grep -E "axe-results-.*\.json|base64" -R playwright-report || true
+
       - name: "Collect playwright report and run a11y diff (auto-comment on PRs)"
         if: always()
         env:
