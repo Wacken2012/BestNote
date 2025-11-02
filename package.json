@@ -46,7 +46,7 @@
     "playwright": "1.35.0",
     "serve": "14.1.2",
     "supertest": "6.3.3",
-    "typescript": "5.1.6",
+    "typescript": "5.9.3",
     "vite": "7.1.12",
     "vitest": "4.0.3"
   }
