@@ -4,50 +4,50 @@
   "private": true,
   "scripts": {
     "dev": "vite",
-  "build": "vite build",
-  "postbuild": "cp dist/sw.js dist/service-worker.js || true",
+    "build": "vite build",
+    "postbuild": "cp dist/sw.js dist/service-worker.js || true",
     "preview": "vite preview",
     "lint": "eslint --ext .ts,.vue src || true",
     "test": "vitest run",
-  "test:accessibility": "npx playwright test --project=chromium --reporter=html --workers=1 --timeout=300000",
-  "playwright:install": "playwright install --with-deps",
+    "test:accessibility": "npx playwright test --project=chromium --reporter=html --workers=1 --timeout=300000",
+    "playwright:install": "playwright install --with-deps",
     "deploy": "gh-pages -d dist",
     "test:importer": "vitest run tests/import --run"
   },
   "dependencies": {
     "axios": "1.4.0",
+    "better-sqlite3": "^8.4.0",
     "express": "^4.18.2",
-  "jsonwebtoken": "^9.0.0",
-  "ipaddr.js": "^2.0.2",
-  "better-sqlite3": "^8.4.0",
-    "pinia": "2.0.34",
+    "ipaddr.js": "^2.0.2",
+    "jsonwebtoken": "^9.0.0",
+    "pinia": "^2.0.34",
     "uuid": "13.0.0",
     "vite-plugin-pwa": "1.1.0",
     "vue": "3.2.47",
     "vue-i18n": "9.2.2",
     "vue-router": "4.1.6",
-  "webdav": "5.8.0",
+    "webdav": "5.8.0",
     "xml2js": "0.4.23"
   },
   "devDependencies": {
-    "csv-parse": "5.3.6",
-  "ajv": "8.12.0",
+    "@axe-core/playwright": "4.7.2",
+    "@playwright/test": "1.35.0",
     "@types/express": "5.0.4",
     "@types/node": "20.19.23",
+    "@types/supertest": "2.0.12",
     "@vitejs/plugin-vue": "6.0.1",
     "@vue/test-utils": "2.4.6",
+    "ajv": "8.12.0",
+    "axe-core": "4.7.2",
+    "csv-parse": "5.3.6",
     "eslint": "8.45.0",
+    "gh-pages": "5.0.0",
     "jsdom": "27.0.1",
+    "playwright": "1.35.0",
+    "serve": "14.1.2",
+    "supertest": "6.3.3",
     "typescript": "5.1.6",
     "vite": "7.1.12",
     "vitest": "4.0.3"
-    ,"supertest": "6.3.3"
-    ,"@types/supertest": "2.0.12"
-    ,"playwright": "1.35.0"
-    ,"@playwright/test": "1.35.0"
-    ,"axe-core": "4.7.2"
-    ,"@axe-core/playwright": "4.7.2"
-    ,"serve": "14.1.2"
-    ,"gh-pages": "5.0.0"
   }
 }

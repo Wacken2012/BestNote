@@ -15,15 +15,24 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { computed } from 'vue'
 import { useRoute } from 'vue-router'
+import { useNoteStore } from '../stores/noteStore'
 
 const route = useRoute()
-const note = ref({ id: route.params.id || 'new', title: '', content: '' })
+const store = useNoteStore()
+
+const noteId = Number(route.params.id)
+type Note = { id: number | string; title: string; content: string }
+const note = computed<Note>(() => (store.notes as Note[]).find((n: Note) => n.id === noteId) || { id: noteId || 'new', title: '', content: '' })
 
 function saveNote() {
-  console.log('Note saved:', note.value)
-  // TODO: persist note via store or API
+  if (note.value && typeof note.value.id === 'number') {
+    store.updateNote(note.value.id, note.value.title, note.value.content)
+    console.log('Note saved via store:', note.value)
+  } else {
+    console.log('New note (not persisted):', note.value)
+  }
 }
 </script>
 
