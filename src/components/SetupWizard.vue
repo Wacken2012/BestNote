@@ -33,6 +33,7 @@ import { ref, watch, onMounted, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useSetupStore } from '../store/setup'
+import StartStep from './wizard/StartStep.vue'
 import LanguageStep from './wizard/LanguageStep.vue'
 import AdminStep from './wizard/AdminStep.vue'
 import BackupStep from './wizard/BackupStep.vue'
@@ -45,6 +46,7 @@ const router = useRouter()
 const { t, locale } = useI18n()
 
 const steps = [
+  { key: 'start', component: StartStep },
   { key: 'language', component: LanguageStep },
   { key: 'admin', component: AdminStep },
   { key: 'backup', component: BackupStep },
@@ -55,10 +57,17 @@ const steps = [
 
 const currentStep = ref(1)
 const submitting = ref(false)
-const form = ref({})
+const form = ref({ orgName: '', language: 'de', demoMode: false })
 
 // react to language changes in the store
+// keep i18n in sync with the store
 watch(() => store.language, (v) => { if (v) locale.value = v })
+
+// When the user changes language in the wizard form, apply it immediately
+watch(() => form.value.language, (newLang) => {
+  if (!newLang) return
+  try { store.setLanguage(newLang); locale.value = newLang } catch (e) {}
+})
 
 function prevStep() {
   if (currentStep.value > 1) currentStep.value--
@@ -71,9 +80,27 @@ async function nextStep() {
   }
   // finish: persist and redirect
   submitting.value = true
-  store.setSetupCompleted(true)
-  // store persists to localStorage in the action; also ensure i18n locale set
-  if (store.language) locale.value = store.language
+  try {
+    // persist orgName, language and demoMode
+    const payload = {
+      orgName: (form.value && (form.value as any).orgName) || store.orgName || '',
+      language: (form.value && (form.value as any).language) || store.language || 'de',
+      demoMode: !!((form.value && (form.value as any).demoMode) || store.demoMode)
+    }
+    // complete() persists the whole setup to localStorage
+    if (typeof store.complete === 'function') {
+      // call the complete action
+      // @ts-ignore
+      store.complete(payload)
+    } else {
+      // fallback to existing setters
+      try { store.setLanguage(payload.language) } catch (e) {}
+    }
+    // ensure i18n locale reflects the persisted language
+    try { locale.value = payload.language } catch (e) {}
+  } catch (e) {
+    // swallow persistence errors
+  }
   submitting.value = false
   // navigate to dashboard
   await router.push({ name: 'Dashboard' })

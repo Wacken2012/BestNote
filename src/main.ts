@@ -14,7 +14,10 @@ const app = createApp(App)
 const pinia = createPinia()
 
 const savedLang = localStorage.getItem('lang') || 'de'
-const i18n = createI18n({ locale: savedLang, fallbackLocale: 'en', messages })
+// Use the Composition API mode for vue-i18n (legacy: false) and enable global injection
+// so templates can still use $t. This allows `useI18n()` in setup() and keeps
+// legacy-style template usage available via globalInjection.
+const i18n = createI18n({ legacy: false, globalInjection: true, locale: savedLang, fallbackLocale: 'en', messages })
 
 app.use(pinia)
 app.use(router)
@@ -27,6 +30,42 @@ app.directive('can-calendar', vCanCalendar)
 // Service worker registration will be handled by vite-plugin-pwa automatically
 
 app.mount('#app')
+
+// Load persisted setup and apply language + demo data initialization
+try {
+	const setupStore = (pinia as any)._s || undefined
+} catch (e) {}
+try {
+	// import stores dynamically to avoid tree-shaking issues
+	const { useSetupStore } = await import('./store/setup')
+	const setup = useSetupStore(pinia)
+	setup.load()
+	// apply saved language to i18n global
+	try { (i18n as any).global.locale.value = setup.language || savedLang } catch (e) {}
+	// initialize demo stores that respect demoMode
+	try {
+		const { useMembersStore } = await import('./stores/membersStore')
+		const members = useMembersStore(pinia)
+		if (typeof members.init === 'function') members.init()
+	} catch (e) {}
+	try {
+		const { useSheetsStore } = await import('./stores/sheetsStore')
+		const sheets = useSheetsStore(pinia)
+		if (typeof sheets.init === 'function') sheets.init()
+	} catch (e) {}
+	try {
+		const { useEventsStore } = await import('./store/eventsStore')
+		const events = useEventsStore(pinia)
+		if (typeof events.init === 'function') events.init()
+	} catch (e) {}
+	try {
+		const { useNoteStore } = await import('./stores/noteStore')
+		const notes = useNoteStore(pinia)
+		if (typeof notes.init === 'function') notes.init()
+	} catch (e) {}
+} catch (e) {
+	// best-effort: don't block app if dynamic imports fail
+}
 
 // default readiness flag for component-level readiness used by Playwright tests
 try { (window as any).APP_READY_FOR_TESTS = false } catch (e) { /* noop in non-browser env */ }

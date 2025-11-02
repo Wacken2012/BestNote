@@ -1,24 +1,10 @@
 import { defineStore } from 'pinia'
 import type { Note } from '../types/note'
+import { useSetupStore } from '../store/setup'
 
 export const useNoteStore = defineStore('note', {
   state: () => ({
-    notes: [
-      {
-        id: 1,
-        sheetId: 1,
-        author: 'Dirigent',
-        content: 'Takt 42: Einsatz verzögern',
-        createdAt: new Date().toISOString(),
-      },
-      {
-        id: 2,
-        sheetId: 1,
-        author: 'Mitglied',
-        content: 'Bitte Tempo beachten',
-        createdAt: new Date().toISOString(),
-      },
-    ] as Note[],
+    notes: [] as Note[],
   }),
   actions: {
     addNote(sheetId: number, content: string, author = 'Du') {
@@ -30,5 +16,13 @@ export const useNoteStore = defineStore('note', {
     getNotesForSheet(sheetId: number) {
       return this.notes.filter(n => n.sheetId === sheetId)
     },
+    init() {
+      const setup = useSetupStore()
+      if ((import.meta.env.VITE_DEMO === 'true') || !!setup.demoMode) {
+        this.notes = [
+          { id: 1, sheetId: 1, author: 'Dirigent', content: 'Takt 42: Einsatz verzögern', createdAt: new Date().toISOString() },
+        ]
+      }
+    }
   },
 })
