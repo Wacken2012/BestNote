@@ -13,13 +13,18 @@ import vCanCalendar from './directives/canCalendar'
 const app = createApp(App)
 const pinia = createPinia()
 
-const savedLang = localStorage.getItem('lang') || 'de'
+// Load setup BEFORE router to ensure VITE_TEST_MODE is applied before first navigation
+app.use(pinia)
+const { useSetupStore } = await import('./store/setup')
+const setupStore = useSetupStore(pinia)
+setupStore.load()
+
+const savedLang = setupStore.language || localStorage.getItem('lang') || 'de'
 // Use the Composition API mode for vue-i18n (legacy: false) and enable global injection
 // so templates can still use $t. This allows `useI18n()` in setup() and keeps
 // legacy-style template usage available via globalInjection.
 const i18n = createI18n({ legacy: false, globalInjection: true, locale: savedLang, fallbackLocale: 'en', messages })
 
-app.use(pinia)
 app.use(router)
 app.use(i18n)
 app.directive('can', vCan)
@@ -31,17 +36,10 @@ app.directive('can-calendar', vCanCalendar)
 
 app.mount('#app')
 
-// Load persisted setup and apply language + demo data initialization
+// Initialize demo stores that respect demoMode (setup already loaded before mount)
 try {
-	const setupStore = (pinia as any)._s || undefined
-} catch (e) {}
-try {
-	// import stores dynamically to avoid tree-shaking issues
-	const { useSetupStore } = await import('./store/setup')
-	const setup = useSetupStore(pinia)
-	setup.load()
 	// apply saved language to i18n global
-	try { (i18n as any).global.locale.value = setup.language || savedLang } catch (e) {}
+	try { (i18n as any).global.locale.value = setupStore.language || savedLang } catch (e) {}
 	// initialize demo stores that respect demoMode
 	try {
 		const { useMembersStore } = await import('./stores/membersStore')
