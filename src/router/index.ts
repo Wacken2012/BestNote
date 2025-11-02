@@ -14,6 +14,7 @@ const routes: RouteRecordRaw[] = [
   { path: '/notes', name: 'NotesList', component: () => import('../views/NoteList.vue') },
   { path: '/notes/:id', name: 'NoteEditor', component: () => import('../views/NoteEditor.vue') },
   { path: '/create', name: 'NoteCreate', component: () => import('../views/NoteCreate.vue') },
+  { path: '/sheets/:id', name: 'SheetView', component: () => import('../views/SheetView.vue') },
   { path: '/settings', name: 'Settings', component: () => import('../views/SettingsView.vue'), meta: { roles: ['admin'] } },
   { path: '/import', name: 'MemberImport', component: () => import('../views/MemberImport.vue') },
   { path: '/login', name: 'Login', component: () => import('../components/Login.vue') },
