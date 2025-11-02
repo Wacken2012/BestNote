@@ -5,7 +5,7 @@ import { useUserStore } from '../store/user'
 import { useAuthStore } from '../store/auth'
 
 const routes: RouteRecordRaw[] = [
-  { path: '/', redirect: '/dashboard' },
+  { path: '/', redirect: '/setup' },
   { path: '/dashboard', name: 'Dashboard', component: () => import('../components/MainDashboard.vue'), meta: { roles: ['admin','vorstand','notenwart','mitglied'] } },
   { path: '/library', name: 'Library', component: () => import('../views/LibraryView.vue'), meta: { roles: ['admin','notenwart','dirigent','mitglied'] } },
   { path: '/members', name: 'Members', component: () => import('../views/MembersView.vue'), meta: { roles: ['admin','vorstand'] } },
@@ -18,7 +18,7 @@ const routes: RouteRecordRaw[] = [
   { path: '/settings', name: 'Settings', component: () => import('../views/SettingsView.vue'), meta: { roles: ['admin'] } },
   { path: '/import', name: 'MemberImport', component: () => import('../views/MemberImport.vue') },
   { path: '/login', name: 'Login', component: () => import('../components/Login.vue') },
-  { path: '/setup', name: 'Setup', component: () => import('../components/SetupWizard.vue') }
+  { path: '/setup', name: 'Setup', component: () => import('../views/SetupView.vue') }
 ]
 
 const router = createRouter({ history: createWebHistory(), routes })
