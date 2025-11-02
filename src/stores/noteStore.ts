@@ -1,25 +1,19 @@
 import { defineStore } from 'pinia'
+import type { Note } from '../types/note'
 
 export const useNoteStore = defineStore('note', {
   state: () => ({
-    notes: [
-      { id: 1, title: 'Erste Notiz', content: 'Inhalt' },
-      { id: 2, title: 'Zweite Notiz', content: 'Mehr Inhalt' },
-    ],
+    notes: [] as Note[],
   }),
   actions: {
-    updateNote(id: number, title: string, content: string) {
-      const note: any = this.notes.find((n: any) => n.id === id)
-      if (note) {
-        note.title = title
-        note.content = content
-      }
+    addNote(sheetId: number, content: string, author = 'Du') {
+      const id = Date.now()
+      const createdAt = new Date().toISOString()
+      this.notes.push({ id, sheetId, content, author, createdAt })
+      return id
     },
-    createNote(title: string, content: string) {
-      const ids = this.notes.map((n: any) => Number(n.id) || 0)
-      const newId = ids.length ? Math.max(...ids) + 1 : 1
-      this.notes.push({ id: newId, title, content })
-      return newId
+    getNotesForSheet(sheetId: number) {
+      return this.notes.filter(n => n.sheetId === sheetId)
     },
   },
 })
