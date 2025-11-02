@@ -1,7 +1,12 @@
 <template>
-  <section aria-label="Notizliste" role="list">
-    <NoteCard v-for="note in notes" :key="note.id" :note="note" />
-  </section>
+  <div>
+    <router-link to="/create">
+      <button aria-label="Neue Notiz erstellen">Neue Notiz</button>
+    </router-link>
+    <section aria-label="Notizliste" role="list">
+      <NoteCard v-for="note in notes" :key="note.id" :note="note" />
+    </section>
+  </div>
 </template>
 
 <script setup lang="ts">

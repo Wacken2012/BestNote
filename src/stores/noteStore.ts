@@ -19,6 +19,7 @@ export const useNoteStore = defineStore('note', {
       const ids = this.notes.map((n: any) => Number(n.id) || 0)
       const newId = ids.length ? Math.max(...ids) + 1 : 1
       this.notes.push({ id: newId, title, content })
+      return newId
     },
   },
 })
