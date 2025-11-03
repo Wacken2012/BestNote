@@ -45,7 +45,7 @@
     "jsdom": "27.0.1",
     "playwright": "1.35.0",
     "serve": "14.1.2",
-    "supertest": "6.3.3",
+    "supertest": "7.1.4",
     "typescript": "5.1.6",
     "vite": "7.1.12",
     "vitest": "4.0.3"
